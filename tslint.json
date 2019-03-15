@@ -1,0 +1,18 @@
+{
+  "extends": "tslint-config-airbnb",
+  "rules": {
+    "no-trailing-whitespace": false,
+    "trailing-comma": false,
+    "import-name": false,
+    "align": false,
+    "variable-name": false,
+    "max-line-length": false
+  },
+  "linterOptions": {
+    "exclude": [
+      "config/**/*.js",
+      "node_modules/**/*.ts",
+      "coverage/lcov-report/*.js"
+    ]
+  }
+}

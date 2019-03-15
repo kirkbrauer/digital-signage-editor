@@ -1,0 +1,38 @@
+{
+  "name": "digital-signage-editor",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "Kirk Brauer",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "precommit": [
+    "build"
+  ],
+  "devDependencies": {
+    "@types/draft-js": "^0.10.29",
+    "@types/fabric": "^2.6.1",
+    "@types/react": "^16.8.7",
+    "@types/react-dom": "^16.8.2",
+    "@types/react-outside-click-handler": "^1.2.0",
+    "@types/react-rnd": "^7.4.3",
+    "@types/shortid": "^0.0.29",
+    "tslint": "^5.13.1",
+    "tslint-config-airbnb": "^5.11.1",
+    "typescript": "^3.1.6"
+  },
+  "dependencies": {
+    "digital-signage-types": "https://github.com/kirkbrauer/digital-signage-types",
+    "draft-js": "^0.10.5",
+    "fabric": "^2.7.0",
+    "pre-commit": "^1.2.2",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-outside-click-handler": "^1.2.3",
+    "react-rnd": "^9.1.2",
+    "shortid": "^2.2.14",
+    "tslib": "^1.9.3"
+  }
+}
