@@ -29,22 +29,22 @@ export abstract class ShapeNode<T extends ShapeNodeConfig = ShapeNodeConfig, R =
   /**
    * Outline stroke color.
    */
-  stroke: Fill | null;
+  private stroke: Fill | null;
 
   /**
    * Fill of the shape.
    */
-  fill: Fill | null;
+  private fill: Fill | null;
 
   /**
    * Weight of the outline stroke.
    */
-  strokeWeight: number | null;
+  private strokeWeight: number | null;
 
   /**
    * Outline stroke alignment.
    */
-  strokeAlign: StrokeAlign | null;
+  private strokeAlign: StrokeAlign | null;
 
   private position: Vector;
 
@@ -61,6 +61,74 @@ export abstract class ShapeNode<T extends ShapeNodeConfig = ShapeNodeConfig, R =
     this.fill = config.fill || null;
     this.strokeWeight = config.strokeWeight || null;
     this.strokeAlign = config.strokeAlign || null;
+  }
+
+  /**
+   * Returns the stroke.
+   */
+  public getStroke(): Fill | null {
+    return this.stroke;
+  }
+
+  /**
+   * Sets the stroke.
+   * @param stroke The new stroke.
+   */
+  public setStroke(stroke: Fill | null) {
+    return this.cloneWith({
+      stroke
+    });
+  }
+
+  /**
+   * Returns the fill.
+   */
+  public getFill(): Fill | null {
+    return this.fill;
+  }
+
+  /**
+   * Sets the fill.
+   * @param fill The new fill.
+   */
+  public setFill(fill: Fill | null) {
+    return this.cloneWith({
+      fill
+    });
+  }
+
+  /**
+   * Returns the stroke weight.
+   */
+  public getStrokeWeight(): number | null {
+    return this.strokeWeight;
+  }
+
+  /**
+   * Sets the the stroke weight.
+   * @param strokeWeight The new stroke weight.
+   */
+  public setStrokeWeight(strokeWeight: number | null) {
+    return this.cloneWith({
+      strokeWeight
+    });
+  }
+
+  /**
+   * Returns the stroke alignment.
+   */
+  public getStrokeAlign(): StrokeAlign | null {
+    return this.strokeAlign;
+  }
+
+  /**
+   * Sets the stroke alignment.
+   * @param strokeAlign The new stroke weight.
+   */
+  public setStrokeAlign(strokeAlign: StrokeAlign | null) {
+    return this.cloneWith({
+      strokeAlign
+    });
   }
 
   public getPosition() {

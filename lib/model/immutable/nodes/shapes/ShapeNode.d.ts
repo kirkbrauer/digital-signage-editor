@@ -25,23 +25,59 @@ export declare abstract class ShapeNode<T extends ShapeNodeConfig = ShapeNodeCon
     /**
      * Outline stroke color.
      */
-    stroke: Fill | null;
+    private stroke;
     /**
      * Fill of the shape.
      */
-    fill: Fill | null;
+    private fill;
     /**
      * Weight of the outline stroke.
      */
-    strokeWeight: number | null;
+    private strokeWeight;
     /**
      * Outline stroke alignment.
      */
-    strokeAlign: StrokeAlign | null;
+    private strokeAlign;
     private position;
     private height;
     private width;
     constructor(config: ShapeNodeConfig);
+    /**
+     * Returns the stroke.
+     */
+    getStroke(): Fill | null;
+    /**
+     * Sets the stroke.
+     * @param stroke The new stroke.
+     */
+    setStroke(stroke: Fill | null): this;
+    /**
+     * Returns the fill.
+     */
+    getFill(): Fill | null;
+    /**
+     * Sets the fill.
+     * @param fill The new fill.
+     */
+    setFill(fill: Fill | null): this;
+    /**
+     * Returns the stroke weight.
+     */
+    getStrokeWeight(): number | null;
+    /**
+     * Sets the the stroke weight.
+     * @param strokeWeight The new stroke weight.
+     */
+    setStrokeWeight(strokeWeight: number | null): this;
+    /**
+     * Returns the stroke alignment.
+     */
+    getStrokeAlign(): StrokeAlign | null;
+    /**
+     * Sets the stroke alignment.
+     * @param strokeAlign The new stroke weight.
+     */
+    setStrokeAlign(strokeAlign: StrokeAlign | null): this;
     getPosition(): Vector;
     setPosition(position: Vector): this;
     getHeight(): number;

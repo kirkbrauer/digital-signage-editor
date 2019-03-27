@@ -1,8 +1,8 @@
 import React, { Component, CSSProperties } from 'react';
 import { Node, ColorStop, GradientType, ImageScaleMode, ImageRepeatMode, StrokeAlign, Vector } from '../model/immutable';
-import { Rnd, DraggableData, ResizableDelta, Position } from 'react-rnd';
-import { ResizableDirection } from 're-resizable';
-import OutsideClickHandler from 'react-outside-click-handler';
+import Resizable, { ResizableDirection, NumberSize } from 're-resizable';
+import Draggable, { DraggableData } from 'react-draggable';
+// import OutsideClickHandler from 'react-outside-click-handler';
 import { Fill } from '../model/immutable/Fill';
 
 export interface NodeProps<T extends Node> {
@@ -10,12 +10,17 @@ export interface NodeProps<T extends Node> {
   inGroup?: boolean;
   groupPosition?: Vector;
   selected?: boolean;
+  editing?: boolean;
+  onStartEditing?: () => void;
+  onStopEditing?: () => void;
   onSelect?: () => void;
   onDeselect?: () => void;
   onChange?: (node: Node) => void;
 }
 
 abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component<NodeProps<T>, S, SS> {
+
+  protected dragging = false;
 
   protected getGradientTypeString(gradientType?: GradientType): string {
     switch (gradientType) {
@@ -108,18 +113,19 @@ abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component
     return {};
   }
 
-  protected abstract renderContent(): JSX.Element;
+  protected abstract renderStaticContent(): JSX.Element;
+
+  protected renderEditableContent(): JSX.Element {
+    return this.renderStaticContent();
+  }
 
   private onSelect(e: React.MouseEvent) {
-    if (this.props.selected) {
-      e.persist();
-    } else if (this.props.onSelect) {
-      e.preventDefault();
+    if (this.props.onSelect) {
       this.props.onSelect();
     }
   }
 
-  private onDragStop(e: any, data: DraggableData) {
+  private onDrag(e: any, data: DraggableData) {
     if (this.props.onChange) {
       this.props.onChange(
         this.props.node.setPosition({
@@ -130,12 +136,34 @@ abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component
     }
   }
 
-  private onResize(e: MouseEvent | TouchEvent, dir: ResizableDirection, ref: HTMLDivElement, delta: ResizableDelta, position: Position) {
+  private onResize(e: MouseEvent | TouchEvent, dir: ResizableDirection, ref: HTMLDivElement, delta: NumberSize) {
     if (this.props.onChange) {
       let newNode: Node = this.props.node;
+      // Calculate the position delta since the last resize
+      const deltaX = ref.clientWidth - this.props.node.getWidth();
+      const deltaY = ref.clientHeight - this.props.node.getHeight();
+      // Calculate the new positions
+      const xPos = this.props.node.getXPos() - deltaX;
+      const yPos = this.props.node.getYPos() - deltaY;
+      // Set the new position based on resize direction
+      if (dir === 'top' || dir === 'left' || dir === 'topLeft') {
+        newNode = newNode.setPosition({
+          x: xPos,
+          y: yPos
+        });
+      } else if (dir === 'topRight') {
+        newNode = newNode.setPosition({
+          x: this.props.node.getXPos(),
+          y: yPos
+        });
+      } else if (dir === 'bottomLeft') {
+        newNode = newNode.setPosition({
+          x: xPos,
+          y: this.props.node.getYPos()
+        });
+      }
       newNode = newNode.setWidth(ref.clientWidth);
       newNode = newNode.setHeight(ref.clientHeight);
-      newNode = newNode.setPosition(position);
       this.props.onChange(newNode);
     }
   }
@@ -147,45 +175,90 @@ abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component
       width: 9,
       backgroundColor: 'blue',
       borderRadius: '50%',
-      boxShadow: '0 0 0 1px white',
-      zIndex: 1000
+      boxShadow: '0 0 0 1px white'
     };
-    const divStyle = {
-      opacity: node.isVisible() ? node.getOpacity() : 0,
-      zIndex: node.getZIndex(),
-      cursor: !this.props.selected ? 'default' : 'move',
-    };
-    if (!this.props.inGroup) {
+    if (this.props.inGroup) {
       return (
-        <OutsideClickHandler
-          onOutsideClick={() => {
-            if (this.props.selected) {
-              if (this.props.onDeselect) {
-                this.props.onDeselect();
-              }
-            }
+        <div style={{
+          transform: `translate(${node.getXPos() - this.props.groupPosition!.x}px, ${node.getYPos() - this.props.groupPosition!.y}px)`,
+          height: node.getHeight(),
+          width: node.getWidth(),
+          position: 'absolute'
+        }}>
+          {this.renderStaticContent()}
+        </div>
+      );
+    }
+    if (this.props.editing) {
+      return (
+        <div style={{
+          transform: `translate(${node.getXPos()}px, ${node.getYPos()}px)`,
+          height: node.getHeight(),
+          width: node.getWidth(),
+          position: 'absolute',
+          boxShadow: 'blue 0 0 0 1px, rgba(0, 0, 255, 0.8) 0 0 1px 1px, rgba(0, 0, 255, 0.8) inset 0 0 1px 1px'
+        }}>
+          {this.renderEditableContent()}
+        </div>
+      );
+    }
+    return (
+      <div
+        onDoubleClick={() => {
+          if (this.props.onStartEditing) {
+            this.props.onStartEditing();
+          }
+        }}
+        style={{
+          cursor: 'move'
+        }}
+      >
+        <Draggable
+          position={node.getPosition()}
+          onStart={() => {
+            if (this.props.onSelect) this.props.onSelect();
+          }}
+          onDrag={(e, data) => {
+            this.dragging = true;
+            e.stopPropagation();
+            this.onDrag(e, data);
+          }}
+          onStop={(e, data) => {
+            this.dragging = false;
+            e.stopPropagation();
+            if (this.props.onSelect) this.props.onSelect();
           }}
         >
-          <Rnd
-            style={divStyle}
-            enableResizing={{
-              bottom: this.props.selected,
-              bottomLeft: this.props.selected,
-              bottomRight: this.props.selected,
-              left: this.props.selected,
-              right: this.props.selected,
-              top: this.props.selected,
-              topLeft: this.props.selected,
-              topRight: this.props.selected
+          <Resizable
+            style={{
+              position: 'absolute'
             }}
-            onClick={(e: React.MouseEvent) => this.onSelect(e)}
-            disableDragging={!this.props.selected}
-            size={{ width: node.getWidth(), height: node.getHeight() }}
             lockAspectRatio={node.shouldPreserveRatio()}
-            position={node.getPosition()}
-            onDragStop={(e, d) => this.onDragStop(e, d)}
-            onResize={(e, direction, ref, delta, position) => this.onResize(e, direction, ref, delta, position)}
-            resizeHandleStyles={this.props.selected ? {
+            onClick={e => this.onSelect(e)}
+            size={{ width: node.getWidth(), height: node.getHeight() }}
+            enable={{
+              top: this.props.selected,
+              right: this.props.selected,
+              bottom: this.props.selected,
+              left: this.props.selected,
+              topRight: this.props.selected,
+              bottomRight: this.props.selected,
+              bottomLeft: this.props.selected,
+              topLeft: this.props.selected
+            }}
+            onResizeStart={(e) => {
+              e.stopPropagation();
+              if (this.props.onSelect) this.props.onSelect();
+            }}
+            onResize={(e, direction, ref, d) => {
+              e.stopPropagation();
+              this.onResize(e, direction, ref, d);
+            }}
+            onResizeStop={(e) => {
+              e.stopPropagation();
+              if (this.props.onSelect) this.props.onSelect();
+            }}
+            handleStyles={this.props.selected ? {
               top: {
                 ...resizeHandleStyle,
                 left: 'calc(50% - 4.5px)'
@@ -223,8 +296,7 @@ abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component
                 ...resizeHandleStyle
               }
             } : undefined}
-            resizeHandleWrapperStyle={this.props.selected ? {
-              zIndex: 1000,
+            handleWrapperStyle={this.props.selected ? {
               display: 'block',
               height: '100%',
               width: '100%',
@@ -233,20 +305,9 @@ abstract class NodeComponent<T extends Node, S = {}, SS = any> extends Component
               top: '-100%'
             } : undefined}
           >
-            {this.renderContent()}
-          </Rnd>
-        </OutsideClickHandler>
-      );
-    }
-    return (
-      <div style={{
-        ...divStyle,
-        transform: `translate(${node.getXPos() - this.props.groupPosition!.x}px, ${node.getYPos() - this.props.groupPosition!.y}px)`,
-        height: node.getHeight(),
-        width: node.getWidth(),
-        position: 'absolute'
-      }}>
-        {this.renderContent()}
+            {this.renderStaticContent()}
+          </Resizable>
+        </Draggable>
       </div>
     );
   }

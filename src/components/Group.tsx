@@ -5,7 +5,7 @@ import Node from './Node';
 
 export default class Group extends NodeComponent<GroupNode> {
 
-  public renderContent() {
+  public renderStaticContent() {
     return (
       <div style={{ width: '100%', height: '100%', position: 'relative' }}>
         {this.props.node.getNodes().map(node => (

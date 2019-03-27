@@ -52,7 +52,7 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
 
   private onSelectionGroupNodeChange(node: ImmutableNode) {
     if (this.props.onChange) {
-      const newState = this.props.editorState.setSelectionGroup(node as ImmutableGroupNode);
+      const newState = this.props.editorState.updateSelectionGroup(node as ImmutableGroupNode);
       this.props.onChange(newState);
     }
   }
@@ -72,6 +72,21 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
         id,
         this.state.keysPressed.includes('Shift')
       );
+      // Stop editing the node when another node is selected
+      this.props.onChange(newState.stopEditing());
+    }
+  }
+
+  private onStartEditing(id: string) {
+    if (this.props.onChange) {
+      const newState = this.props.editorState.edit(id);
+      this.props.onChange(newState);
+    }
+  }
+
+  private onStopEditing() {
+    if (this.props.onChange) {
+      const newState = this.props.editorState.stopEditing();
       this.props.onChange(newState);
     }
   }
@@ -80,30 +95,71 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
     if (this.props.onChange) {
       // Allow multiple selection when shift is pressed
       if (!this.state.keysPressed.includes('Shift')) {
-        const newState = this.props.editorState.deselectAll();
+        const newState = this.props.editorState.deselectAll().stopEditing();
         this.props.onChange(newState);
       }
     }
   }
   
+  private onEditorClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    // Get the x and y position of the click relative to the editor element
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPos = e.clientX - rect.left;
+    const yPos = e.clientY - rect.top;
+    // Check if the click is outside the current selection
+    // A 5 px buffer is added to accommodate the resize handles
+    const editorState = this.props.editorState;
+    if (
+      !(
+        (
+          (xPos >= editorState.getSelectionXPos() - 5) &&
+          (xPos <= (editorState.getSelectionXPos() + editorState.getSelectionWidth() + 5))
+        ) &&
+        (
+          (yPos >= editorState.getSelectionYPos() - 5) &&
+          (yPos <= (editorState.getSelectionYPos() + editorState.getSelectionHeight() + 5))
+        )
+      )
+    ) {
+      if (this.props.onChange) {
+        this.props.onChange(editorState.deselectAll());
+      }
+    }
+  }
+
   render() {
-    const selectionGroup = this.props.editorState.getSelectionGroup();
     return (
-      <div style={{
-        width: this.props.editorState.getDocument().getWidth(),
-        height: this.props.editorState.getDocument().getHeight(),
-        position: 'relative'
-      }}>
+      <div
+        style={{
+          width: this.props.editorState.getDocument().getWidth(),
+          height: this.props.editorState.getDocument().getHeight(),
+          position: 'relative'
+        }}
+        onClick={e => this.onEditorClick(e)}
+      >
+        {this.props.editorState.getEditNode() ? (
+          <Node
+            key={this.props.editorState.getEditNode()!.getID()}
+            node={this.props.editorState.getEditNode()!}
+            onDeselect={() => this.onDeselect()}
+            onChange={node => this.onNodeChange(node)}
+            editing={true}
+            selected={true}
+          />) : null}
         {this.props.editorState.getSelectionGroup() ? (
           <Group
-            key={selectionGroup!.getID()}
-            node={selectionGroup!}
+            key={this.props.editorState.getSelectionGroup()!.getID()}
+            node={this.props.editorState.getSelectionGroup()!}
             selected={true}
+            editing={false}
             onDeselect={() => this.onDeselect()}
             onChange={node => this.onSelectionGroupNodeChange(node)}
           />) : null}
         {this.props.editorState.getDocument().getNodes().map((node) => {
-          // Only render the node if it isn't in the selection group
+          // Only render the node if it isn't in the selection group or being edited
+          if (this.props.editorState.getEditId() === node.getID()) {
+            return null;
+          }
           if (this.props.editorState.getSelectedIds().length > 1) {
             if (this.props.editorState.getSelectedIds().includes(node.getID())) {
               return null;
@@ -114,8 +170,11 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
               key={node.getID()}
               node={node}
               onSelect={() => this.onSelect(node.getID())}
+              onStartEditing={() => this.onStartEditing(node.getID())}
+              onStopEditing={() => this.onStopEditing()}
               onDeselect={() => this.onDeselect()}
               selected={this.props.editorState.getSelectedIds().includes(node.getID())}
+              editing={false}
               onChange={node => this.onNodeChange(node)}
             />
           );

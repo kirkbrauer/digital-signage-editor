@@ -21,7 +21,10 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
     private onSelectionGroupNodeChange;
     private onNodeChange;
     private onSelect;
+    private onStartEditing;
+    private onStopEditing;
     private onDeselect;
+    private onEditorClick;
     render(): JSX.Element;
 }
 export {};

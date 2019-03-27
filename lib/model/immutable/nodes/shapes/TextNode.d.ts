@@ -1,7 +1,7 @@
 import { EditorState } from 'draft-js';
 import { ShapeNode, ShapeNodeConfig } from './ShapeNode';
 export interface TextNodeConfig extends ShapeNodeConfig {
-    editorState: EditorState;
+    editorState?: EditorState;
 }
 /**
  * A text node.

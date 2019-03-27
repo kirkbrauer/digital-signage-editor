@@ -17,7 +17,6 @@
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
     "@types/react-outside-click-handler": "^1.2.0",
-    "@types/react-rnd": "^7.4.3",
     "@types/shortid": "^0.0.29",
     "tslint": "^5.13.1",
     "tslint-config-airbnb": "^5.11.1",
@@ -28,10 +27,11 @@
     "draft-js": "^0.10.5",
     "fabric": "^2.7.0",
     "pre-commit": "^1.2.2",
+    "re-resizable": "^4.11.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
+    "react-draggable": "^3.2.1",
     "react-outside-click-handler": "^1.2.3",
-    "react-rnd": "^9.1.2",
     "shortid": "^2.2.14",
     "tslib": "^1.9.3"
   }

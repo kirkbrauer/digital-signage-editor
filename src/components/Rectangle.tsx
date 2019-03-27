@@ -18,14 +18,14 @@ export default class Rectangle extends NodeComponent<RectangleNode> {
     return {};
   }
 
-  public renderContent() {
+  public renderStaticContent() {
     return (
       <div 
       style={{
         height: '100%',
         width: '100%',
-        ...this.getFillStyle(this.props.node.fill!),
-        ...this.getStrokeStyle(this.props.node.stroke!, this.props.node.strokeWeight!, this.props.node.strokeAlign),
+        ...this.getFillStyle(this.props.node.getFill()),
+        ...this.getStrokeStyle(this.props.node.getStroke(), this.props.node.getStrokeWeight(), this.props.node.getStrokeAlign()),
         ...this.getCornerStyle(this.props.node.getCornerRadius(), this.props.node.getCornerRadii())
       }}/>
     );

@@ -2,7 +2,7 @@ import { EditorState } from 'draft-js';
 import { ShapeNode, ShapeNodeConfig } from './ShapeNode';
 
 export interface TextNodeConfig extends ShapeNodeConfig {
-  editorState: EditorState;
+  editorState?: EditorState;
 }
 
 /**
@@ -12,7 +12,7 @@ export class TextNode extends ShapeNode<TextNodeConfig> {
 
   constructor(config: TextNodeConfig) {
     super(config);
-    this.editorState = config.editorState;
+    this.editorState = config.editorState || EditorState.createEmpty();
   }
 
   /**

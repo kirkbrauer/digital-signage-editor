@@ -118,10 +118,12 @@ export abstract class Sizeable<T = any, R = any> extends Immutable<T, R> {
     const deltaX = position.x - this.getXPos();
     const deltaY = position.y - this.getYPos();
     for (const child of children) {
-      newChildren.push(child.setPosition({
-        x: child.getXPos() + deltaX,
-        y: child.getYPos() + deltaY
-      }));
+      newChildren.push(
+        child.setPosition({
+          x: child.getXPos() + deltaX,
+          y: child.getYPos() + deltaY
+        })
+      );
     }
     return newChildren;
   }
