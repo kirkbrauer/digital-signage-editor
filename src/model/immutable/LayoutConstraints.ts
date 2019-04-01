@@ -1,3 +1,5 @@
+import { Record } from 'immutable';
+
 /**
  * Defines constraint types.
  */
@@ -15,7 +17,7 @@ export enum Constraint {
 /**
  * The layout constraints of a node.
  */
-export interface LayoutConstraints {
+export interface ILayoutConstraints {
   
   /**
    * Vertical constraint.
@@ -28,3 +30,5 @@ export interface LayoutConstraints {
   horizontal?: Constraint;
   
 }
+
+export class LayoutConstraints extends Record<ILayoutConstraints>({}) { }

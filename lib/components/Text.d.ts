@@ -1,7 +1,6 @@
 /// <reference types="react" />
-import { TextNode } from '../model/immutable';
 import NodeComponent from './NodeComponent';
-export default class Text extends NodeComponent<TextNode> {
+export default class Text extends NodeComponent {
     private editorRef;
     componentDidMount(): void;
     renderEditableContent(): JSX.Element;

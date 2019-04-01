@@ -1,159 +1,64 @@
-import { Vector } from './Vector';
-import { Sizeable } from './Sizeable';
-import shortid from 'shortid';
-
-export interface VectorPointConfig {
-  id?: string;
-  position?: Vector;
-  ctrlPointsLocked?: boolean;
-  ctrlPoint1Pos?: Vector;
-  ctrlPoint2Pos?: Vector;
-}
+import { Record } from 'immutable';
+import uuid from 'uuid/v4';
 
 /**
- * A point in a vector point.
+ * A vector point.
  */
-export class VectorPoint extends Sizeable<VectorPointConfig, any> {
+export interface VectorPointProps {
 
   /**
    * ID of the vector point.
    */
-  private id: string;
+  id: string;
 
   /**
-   * Absolute position of the point.
+   * The absolute x position of the point.
    */
-  private position: Vector;
+  x: number;
+
+  /**
+   * The absolute y position of the point.
+   */
+  y: number;
 
   /**
    * Whether the control points are locked.
    */
-  private ctrlPointsLocked: boolean;
+  ctrlPointsLocked?: boolean;
 
   /**
-   * First bezier curve control point.
+   * First bezier curve control point X position.
    */
-  private ctrlPoint2Pos: Vector;
+  ctrlPoint1X?: number;
 
   /**
-   * Second bezier curve control point.
+   * First bezier curve control point Y position.
    */
-  private ctrlPoint1Pos: Vector;
-
-  constructor(config: VectorPointConfig) {
-    super();
-    this.id = config.id || shortid.generate();
-    this.position = config.position || { x: 0, y: 0 };
-    this.ctrlPointsLocked = config.ctrlPointsLocked || false;
-    this.ctrlPoint1Pos = config.ctrlPoint1Pos || this.position;
-    this.ctrlPoint2Pos = config.ctrlPoint2Pos || this.position;
-  }
-
-  public getID(): string {
-    return this.id;
-  }
-
-  public getPosition(): Vector {
-    return this.position;
-  }
-
-  public setPosition(position: Vector): this {
-    return this.cloneWith({
-      position
-    });
-  }
-
-  public getHeight(): number {
-    return 0;
-  }
-
-  public setHeight(height: number): this {
-    return this;
-  }
-
-  public getWidth(): number {
-    return 0;
-  }
-
-  public setWidth(width: number): this {
-    return this;
-  }
+  ctrlPoint1Y?: number;
 
   /**
-   * Returns true if the vector point control points are locked.
+   * Second bezier curve control point X position.
    */
-  public areCtrlPointsLocked(): boolean {
-    return this.ctrlPointsLocked;
-  }
+  ctrlPoint2X?: number;
 
   /**
-   * Locks the vector control points.
+   * Second bezier curve control point Y position.
    */
-  public lockCtrlPoints(): VectorPoint {
-    return this.cloneWith({
-      ctrlPointsLocked: true
-    });
+  ctrlPoint2Y?: number;
+
+}
+
+const defaultVectorPoint: VectorPointProps = {
+  id: '',
+  x: 0,
+  y: 0
+};
+
+export class VectorPoint extends Record<VectorPointProps>(defaultVectorPoint) {
+
+  constructor(props?: Partial<VectorPointProps>) {
+    // Generate a unique UUID for a new vector point.
+    super(Object.assign({}, props, { id: (props && props.id) || uuid() }));
   }
 
-  /**
-   * Unlocks the vector control points.
-   */
-  public unlockCtrlPoints(): VectorPoint {
-    return this.cloneWith({
-      ctrlPointsLocked: false
-    });
-  }
-
-  /**
-   * Returns the position of the first control point.
-   */
-  public getCtrlPoint1Pos(): Vector {
-    return this.ctrlPoint1Pos;
-  }
-
-  /**
-   * Sets the position of the first control point.
-   * @param setCtrlPoint1Pos The new position of the control point.
-   */
-  public setCtrlPoint1Pos(ctrlPoint1Pos: Vector): VectorPoint {
-    return this.cloneWith({
-      ctrlPoint1Pos
-    });
-  }
-
-  /**
-   * Returns the position of the second control point.
-   */
-  public getCtrlPoint2Pos(): Vector {
-    return this.ctrlPoint1Pos;
-  }
-
-  /**
-   * Sets the position of the second control point.
-   * @param ctrlPoint2Pos The new position of the control point.
-   */
-  public setCtrlPoint2Pos(ctrlPoint2Pos: Vector): VectorPoint {
-    return this.cloneWith({
-      ctrlPoint2Pos
-    });
-  }
-
-  public toRaw() { }
-
-  public toJS(): VectorPointConfig {
-    return {
-      position: this.position,
-      ctrlPointsLocked: this.ctrlPointsLocked,
-      ctrlPoint1Pos: this.ctrlPoint1Pos,
-      ctrlPoint2Pos: this.ctrlPoint2Pos
-    };
-  }
-
-  public cloneWith(data: VectorPointConfig): this {
-    return new (this as any).constructor({
-      ...this.toJS(),
-      ...data
-    });
-  }
-  
 }

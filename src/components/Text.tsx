@@ -1,9 +1,8 @@
 import React, { createRef } from 'react';
-import { TextNode } from '../model/immutable';
 import NodeComponent from './NodeComponent';
 import { Editor } from 'draft-js';
 
-export default class Text extends NodeComponent<TextNode> {
+export default class Text extends NodeComponent {
 
   private editorRef = createRef<Editor>();
 
@@ -36,7 +35,7 @@ export default class Text extends NodeComponent<TextNode> {
         }}>
           <Editor
             ref={this.editorRef}
-            editorState={this.props.node.getEditorState()}
+            editorState={this.props.node.editorState!}
             onFocus={() => {
               if (this.dragging) {
                 // Prevent selection while dragging
@@ -56,19 +55,14 @@ export default class Text extends NodeComponent<TextNode> {
             }}
             onChange={(editorState) => {
               if (this.props.onChange) {
-                const newNode = this.props.node.setEditorState(editorState);
+                const newNode = this.props.node.set('editorState', editorState);
                 this.props.onChange(newNode);
               }
             }}
           />
         </div>
         <div
-          style={{
-            width: '100%',
-            height: '100%',
-            ...this.getFillStyle(this.props.node.getFill()),
-            ...this.getStrokeStyle(this.props.node.getStroke(), this.props.node.getStrokeWeight(), this.props.node.getStrokeAlign()),
-          }}
+          style={this.props.node.toCSS()}
         />
       </>
     );

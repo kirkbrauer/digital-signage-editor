@@ -1,99 +1,76 @@
+import { Record, List } from 'immutable';
 import { Document } from './Document';
-import { Node, GroupNode } from './nodes';
-import shortid from 'shortid';
-import { Immutable } from './Immutable';
-import { Vector } from './Vector';
+import { Node, NodeType } from './Node';
+import uuid from 'uuid';
 
-interface EditorStateConfig {
-  document?: Document;
-  selected?: string[];
-  editing?: string | null;
-  selectionGroup?: GroupNode | null;
-}
-
-/**
- * Editor state object.
- */
-export class EditorState extends Immutable<EditorStateConfig, any> {
+export interface IEditorState {
 
   /**
    * Current document.
    */
-  private document: Document;
+  document: Document;
 
   /**
-   * The IDs of currently selected objects.
+   * The IDs of the currently selected nodes.
    */
-  private selected: string[];
+  selectedIDs: List<string>;
 
   /**
    * The ID of the node that is being edited.
    */
-  private editing: string | null;
+  editing: string | null;
 
   /**
-   * The current selection group.
+   * The current clipboard contents.
    */
-  private selectionGroup: GroupNode | null;
+  clipboard: List<Node>;
 
   /**
-   * Static method to create an empty editor state.
+   * A node representing the selection group.
    */
-  public static createEmpty(): EditorState {
-    return new EditorState({});
-  }
+  selectionGroup: Node | null;
+}
+
+const defaultEditorState: IEditorState = {
+  document: new Document(),
+  selectedIDs: List(),
+  editing: null,
+  clipboard: List(),
+  selectionGroup: null
+};
+
+export class EditorState extends Record<IEditorState>(defaultEditorState) {
 
   /**
-   * Static method to create an editor state with a document.
-   * @param document The document for the editor state.
+   * Creates an editor state of a document.
+   * @param document The document.
    */
-  public static createWithDocument(document: Document): EditorState {
+  public static of(document: Document): EditorState {
     return new EditorState({ document });
   }
 
-  constructor(config: EditorStateConfig) {
-    super();
-    this.document = config.document || Document.createEmpty();
-    this.selected = config.selected || [];
-    this.editing = config.editing || null;
-    this.selectionGroup = config.selectionGroup || null;
-  }
-
   /**
-   * Returns the currently selected nodes.
+   * Returns the x position of the current selection.
    */
-  public getSelectedNodes(): Node[] {
-    return this.document.getNodes(this.selected);
-  }
-
-  /**
-   * Deselects all currently selected nodes.
-   */
-  public deselectAll(): EditorState {
-    let newDocument = this.getDocument();
-    if (this.selectionGroup) {
-      // Update the nodes to match the versions in the selection group
-      for (const node of this.selectionGroup.getNodes()) {
-        newDocument = newDocument.updateNode(node);
-      }
+  public getSelectionX(): number {
+    if (this.selectedIDs.count() === 1) {
+      return this.document.getNodeByID(this.selectedIDs.get(0))!.getX();
     }
-    return this.cloneWith({
-      document: newDocument,
-      selected: [],
-      editing: null,
-      selectionGroup: null
-    });
+    if (this.selectionGroup) {
+      return this.selectionGroup.getX();
+    }
+    return 0;
   }
 
   /**
-   * Returns the height of the current selection.
+   * Returns the y position of the current selection.
    */
-  public getSelectionHeight(): number {
-    if (this.selectionGroup) {
-      return this.selectionGroup.getHeight();
+  public getSelectionY(): number {
+    if (this.selectedIDs.count() === 1) {
+      return this.document.getNodeByID(this.selectedIDs.get(0))!.getY();
     }
-    if (this.selected.length === 1) {
-      return this.getSelectedNodes()[0].getHeight();
+    if (this.selectionGroup) {
+      return this.selectionGroup.getY();
     }
     return 0;
   }
@@ -102,167 +79,167 @@ export class EditorState extends Immutable<EditorStateConfig, any> {
    * Returns the width of the current selection.
    */
   public getSelectionWidth(): number {
+    if (this.selectedIDs.count() === 1) {
+      return this.document.getNodeByID(this.selectedIDs.get(0))!.getWidth();
+    }
     if (this.selectionGroup) {
       return this.selectionGroup.getWidth();
-    }
-    if (this.selected.length === 1) {
-      return this.getSelectedNodes()[0].getWidth();
     }
     return 0;
   }
 
   /**
-   * Returns the position of the current selection.
+   * Returns the height of the current selection.
    */
-  public getSelectionPosition(): Vector {
+  public getSelectionHeight(): number {
+    if (this.selectedIDs.count() === 1) {
+      return this.document.getNodeByID(this.selectedIDs.get(0))!.getHeight();
+    }
     if (this.selectionGroup) {
-      return this.selectionGroup.getPosition();
+      return this.selectionGroup.getHeight();
     }
-    if (this.selected.length === 1) {
-      return this.getSelectedNodes()[0].getPosition();
-    }
-    return { x: 0, y: 0 };
+    return 0;
   }
 
   /**
-   * Returns the x position of the current selection.
-   */
-  public getSelectionXPos(): number {
-    return this.getSelectionPosition().x;
-  }
-
-   /**
-     * Returns the y position of the current selection.
-     */
-  public getSelectionYPos(): number {
-    return this.getSelectionPosition().y;
-  }
-
-  /**
-   * Returns the current document.
-   */
-  public getDocument(): Document {
-    return this.document;
-  }
-
-  /**
-   * Sets the current document.
-   * @param document The new document.
-   */
-  public setDocument(document: Document): EditorState {
-    return this.cloneWith({
-      document
-    });
-  }
-
-  /**
-   * Returns the selection group.
-    */
-  public getSelectionGroup(): GroupNode | null {
-    return this.selectionGroup;
-  }
-
-  /**
-   * Sets the selection group.
-   * @param group The new selection group.
-   */
-  public setSelectionGroup(group: GroupNode): EditorState {
-    return this.cloneWith({
-      selectionGroup: group
-    });
-  }
-
-  /**
-   * Syncronizes the document with the selection group.
-   */
-  public sync(): EditorState {
-    let newDocument: Document;
-    // Syncronize each node in the document
-    for (const node of this.selectionGroup!.getNodes()) {
-      newDocument = this.document.updateNode(node);
-    }
-    return this.setDocument(newDocument!);
-  }
-
-  /**
-   * Updates the selection group and syncronizes the document with it.
-   * @param group The updated selection group.
-   */
-  public updateSelectionGroup(group: GroupNode): EditorState {
-    const newState = this.setSelectionGroup(group);
-    return newState.sync();
-  }
-
-  /**
-   * Returns the IDs of the currently selected nodes.
-   */
-  public getSelectedIds(): string[] {
-    return this.selected;
-  }
-
-  /**
-   * Selectes a node.
-   * @param id The ID of the node to select.
-   * @param multiple 
-   */
-  public select(id: string, multiple?: boolean): EditorState {
-    // The new selected node IDs
-    const newSelected = multiple ? [...this.selected, id] : [id];
-    // Get the nodes to put in the selection group
-    const newSelectedNodes = this.document.getNodes(newSelected);
-    return this.cloneWith({
-      selected: newSelected,
-      selectionGroup: multiple ? new GroupNode({
-        id: shortid.generate(),
-        visible: true,
-        opacity: 1.0,
-        nodes: newSelectedNodes
-      }) : null
-    });
-  }
-
-  /**
-   * Starts editing a node.
-   * @param id The ID of the node to edit.
-   */
-  public edit(id: string) {
-    return this.cloneWith({
-      editing: id
-    });
-  }
-
-  /**
-   * Returns the ID of the node currently being edited.
-   */
-  public getEditId(): string | null {
-    return this.editing;
-  }
-
-  /**
-   * Returns the node currently being edited.
+   * Returns the node that is currently being edited.
    */
   public getEditNode(): Node | null {
-    return this.getDocument().getNode(this.editing || '');
+    if (this.editing) {
+      return this.document.getNodeByID(this.editing);
+    }
+    return null;
   }
 
   /**
-   * Stops editing a node.
+   * Returns a list of currently selected nodes.
    */
-  public stopEditing() {
-    return this.cloneWith({
-      editing: null
-    });
+  public getSelectedNodes(): List<Node> {
+    return this.document.getNodesByID(this.selectedIDs);
   }
 
-  public toJS(): EditorStateConfig {
-    return {
-      document: this.document,
-      selected: this.selected,
-      editing: this.editing,
-      selectionGroup: this.selectionGroup
-    };
+  /**
+   * Updates the selction group.
+   * The function also syncronizes the document with the selection group.
+   * @param node The new selection group.
+   */
+  public updateSelectionGroup(node: Node): this {
+    return this
+      .set('selectionGroup', node)
+      .set('document',
+        this.document.updateNodes(node.nodes!)
+      );
   }
 
-  public toRaw() { }
+  /**
+   * Selects a node.
+   * @param id The ID of the node to select.
+   * @param multiple Should multiple nodes be allowed to be selected.
+   */
+  public select(id: string, multiple: boolean): this {
+    const newState = this.set('selectedIDs',
+      multiple ? this.selectedIDs.push(id) : List.of(id)
+    );
+    if (multiple && newState.selectedIDs.count() > 1) {
+      return newState.set('selectionGroup', new Node({
+        type: NodeType.GROUP,
+        nodes: newState.getSelectedNodes()
+      }));
+    }
+    return newState.set('selectionGroup', null);
+  }
+
+  /**
+   * Deselects all nodes.
+   */
+  public deselectAll(): this {
+    return this.set('selectedIDs', List()).set('selectionGroup', null);
+  }
+
+  /**
+   * Selects all nodes in the document.
+   */
+  public selectAll(): this {
+    let newState = this.clone();
+    for (const id of this.selectedIDs) {
+      newState = this.select(id, true);
+    }
+    return newState;
+  }
+
+  /**
+   * Copies nodes by ID.
+   * @param ids The IDs of the nodes to copy.
+   */
+  public copy(ids: List<string>): this {
+    return this.set('clipboard',
+      this.document.getNodesByID(ids)
+    );
+  }
+
+  /**
+   * Cuts nodes by ID.
+   * @param ids The IDs of the nodes to cut.
+   */
+  public cut(ids: List<string>): this {
+    return this.set('clipboard',
+      this.document.getNodesByID(ids)
+    ).set('document',
+      this.document.removeNodesByID(ids)
+    );
+  }
+
+  /**
+   * Pastes the clipboard contents.
+   * @param select Should the pasted nodes be selected.
+   */
+  public paste(select?: boolean): this {
+    const newIDs: string[] = [];
+    let state = this.set('document',
+      this.document.addNodes(this.clipboard.map((node) => {
+        // Give each of the pasted nodes a new ID
+        const newID = uuid();
+        newIDs.push(newID);
+        return node.set('id', newID);
+      }))
+    );
+    // Clear all previous selections
+    state = state.deselectAll();
+    // Select pasted nodes
+    if (select) {
+      for (const newID of newIDs) {
+        state = state.select(newID, true);
+      }
+    }
+    return state;
+  }
+
+  /**
+   * Clears the clipboard.
+   */
+  public clearClipboard(): this {
+    return this.set('clipboard', List());
+  }
+
+  /**
+   * Copies the current selection.
+   */
+  public copySelection(): this {
+    return this.copy(this.selectedIDs);
+  }
+
+  /**
+   * Cuts the current selection.
+   */
+  public cutSelection(): this {
+    return this.cut(this.selectedIDs).set('selectedIDs', List()).set('selectionGroup', null);
+  }
+
+  /**
+   * Clones the editor state.
+   */
+  public clone(): this {
+    return this;
+  }
 
 }

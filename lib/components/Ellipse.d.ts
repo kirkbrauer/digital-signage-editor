@@ -1,6 +1,5 @@
 /// <reference types="react" />
-import { EllipseNode } from '../model/immutable';
 import NodeComponent from './NodeComponent';
-export default class Ellipse extends NodeComponent<EllipseNode> {
+export default class Ellipse extends NodeComponent {
     renderStaticContent(): JSX.Element;
 }

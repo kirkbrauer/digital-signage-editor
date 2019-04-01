@@ -1,21 +1,30 @@
 import React, { Component } from 'react';
-import { Node as NodeState, RectangleNode, EllipseNode, TextNode } from '../model/immutable';
-import { NodeProps } from './NodeComponent';
+import { Node as ImmutableNode, NodeType } from '../model/immutable';
 import Rectangle from './Rectangle';
 import Ellipse from './Ellipse';
 import Text from './Text';
 
-export default class Node extends Component<NodeProps<NodeState>> {
+export interface NodeProps {
+  node: ImmutableNode;
+  inGroup?: boolean;
+  groupX?: number;
+  groupY?: number;
+  selected?: boolean;
+  editing?: boolean;
+  onStartEditing?: () => void;
+  onStopEditing?: () => void;
+  onSelect?: () => void;
+  onDeselect?: () => void;
+  onChange?: (node: ImmutableNode) => void;
+}
+
+export default class Node extends Component<NodeProps> {
 
   render() {
-    if (this.props.node instanceof RectangleNode) {
-      return <Rectangle {...this.props as NodeProps<RectangleNode>}/>;
-    }
-    if (this.props.node instanceof EllipseNode) {
-      return <Ellipse {...this.props as NodeProps<EllipseNode>} />;
-    }
-    if (this.props.node instanceof TextNode) {
-      return <Text {...this.props as NodeProps<TextNode>} />;
+    switch (this.props.node.type) {
+      case NodeType.RECT: return <Rectangle {...this.props} />;
+      case NodeType.ELLIPSE: return <Ellipse {...this.props} />;
+      case NodeType.TEXT: return <Text {...this.props} />;
     }
     return null;
   }

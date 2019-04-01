@@ -1,40 +1,28 @@
-import { Immutable } from './Immutable';
-export interface ColorConfig {
-    r: number;
-    g: number;
-    b: number;
-    a?: number;
-}
-/**
- * A RGBA color.
- */
-export declare class Color extends Immutable<ColorConfig, any> {
+import { Record } from 'immutable';
+export interface IColor {
     /**
      * Red value between 0 and 255.
      */
-    private red;
+    red: number;
     /**
      * Green value between 0 and 255.
      */
-    private green;
+    green: number;
     /**
      * Blue value between 0 and 255.
      */
-    private blue;
+    blue: number;
     /**
      * Alpha value between 0 and 1.
      */
-    private alpha;
-    constructor(config: ColorConfig);
-    getRed(): number;
-    setRed(red: number): Color;
-    getGreen(): number;
-    setGreen(green: number): Color;
-    getBlue(): number;
-    setBlue(blue: number): Color;
-    getAlpha(): number;
-    setAlpha(alpha: number): Color;
-    toString(opacity?: number): string;
-    toJS(): ColorConfig;
-    toRaw(): void;
+    alpha: number;
 }
+declare const Color_base: Record.Factory<IColor>;
+export declare class Color extends Color_base {
+    /**
+     * Converts the color to a rgba string.
+     * @param opacity The opacity of the color's parent.
+     */
+    toString(opacity?: number): string;
+}
+export {};

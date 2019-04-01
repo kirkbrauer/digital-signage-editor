@@ -1,126 +1,109 @@
+import { Record, List } from 'immutable';
 import { Document } from './Document';
-import { Node, GroupNode } from './nodes';
-import { Immutable } from './Immutable';
-import { Vector } from './Vector';
-interface EditorStateConfig {
-    document?: Document;
-    selected?: string[];
-    editing?: string | null;
-    selectionGroup?: GroupNode | null;
-}
-/**
- * Editor state object.
- */
-export declare class EditorState extends Immutable<EditorStateConfig, any> {
+import { Node } from './Node';
+export interface IEditorState {
     /**
      * Current document.
      */
-    private document;
+    document: Document;
     /**
-     * The IDs of currently selected objects.
+     * The IDs of the currently selected nodes.
      */
-    private selected;
+    selectedIDs: List<string>;
     /**
      * The ID of the node that is being edited.
      */
-    private editing;
+    editing: string | null;
     /**
-     * The current selection group.
+     * The current clipboard contents.
      */
-    private selectionGroup;
+    clipboard: List<Node>;
     /**
-     * Static method to create an empty editor state.
+     * A node representing the selection group.
      */
-    static createEmpty(): EditorState;
+    selectionGroup: Node | null;
+}
+declare const EditorState_base: Record.Factory<IEditorState>;
+export declare class EditorState extends EditorState_base {
     /**
-     * Static method to create an editor state with a document.
-     * @param document The document for the editor state.
+     * Creates an editor state of a document.
+     * @param document The document.
      */
-    static createWithDocument(document: Document): EditorState;
-    constructor(config: EditorStateConfig);
+    static of(document: Document): EditorState;
     /**
-     * Returns the currently selected nodes.
+     * Returns the x position of the current selection.
      */
-    getSelectedNodes(): Node[];
+    getSelectionX(): number;
     /**
-     * Deselects all currently selected nodes.
+     * Returns the y position of the current selection.
      */
-    deselectAll(): EditorState;
-    /**
-     * Returns the height of the current selection.
-     */
-    getSelectionHeight(): number;
+    getSelectionY(): number;
     /**
      * Returns the width of the current selection.
      */
     getSelectionWidth(): number;
     /**
-     * Returns the position of the current selection.
+     * Returns the height of the current selection.
      */
-    getSelectionPosition(): Vector;
+    getSelectionHeight(): number;
     /**
-     * Returns the x position of the current selection.
-     */
-    getSelectionXPos(): number;
-    /**
-      * Returns the y position of the current selection.
-      */
-    getSelectionYPos(): number;
-    /**
-     * Returns the current document.
-     */
-    getDocument(): Document;
-    /**
-     * Sets the current document.
-     * @param document The new document.
-     */
-    setDocument(document: Document): EditorState;
-    /**
-     * Returns the selection group.
-      */
-    getSelectionGroup(): GroupNode | null;
-    /**
-     * Sets the selection group.
-     * @param group The new selection group.
-     */
-    setSelectionGroup(group: GroupNode): EditorState;
-    /**
-     * Syncronizes the document with the selection group.
-     */
-    sync(): EditorState;
-    /**
-     * Updates the selection group and syncronizes the document with it.
-     * @param group The updated selection group.
-     */
-    updateSelectionGroup(group: GroupNode): EditorState;
-    /**
-     * Returns the IDs of the currently selected nodes.
-     */
-    getSelectedIds(): string[];
-    /**
-     * Selectes a node.
-     * @param id The ID of the node to select.
-     * @param multiple
-     */
-    select(id: string, multiple?: boolean): EditorState;
-    /**
-     * Starts editing a node.
-     * @param id The ID of the node to edit.
-     */
-    edit(id: string): this;
-    /**
-     * Returns the ID of the node currently being edited.
-     */
-    getEditId(): string | null;
-    /**
-     * Returns the node currently being edited.
+     * Returns the node that is currently being edited.
      */
     getEditNode(): Node | null;
     /**
-     * Stops editing a node.
+     * Returns a list of currently selected nodes.
      */
-    stopEditing(): this;
-    toJS(): EditorStateConfig;
-    toRaw(): void;
+    getSelectedNodes(): List<Node>;
+    /**
+     * Updates the selction group.
+     * The function also syncronizes the document with the selection group.
+     * @param node The new selection group.
+     */
+    updateSelectionGroup(node: Node): this;
+    /**
+     * Selects a node.
+     * @param id The ID of the node to select.
+     * @param multiple Should multiple nodes be allowed to be selected.
+     */
+    select(id: string, multiple: boolean): this;
+    /**
+     * Deselects all nodes.
+     */
+    deselectAll(): this;
+    /**
+     * Selects all nodes in the document.
+     */
+    selectAll(): this;
+    /**
+     * Copies nodes by ID.
+     * @param ids The IDs of the nodes to copy.
+     */
+    copy(ids: List<string>): this;
+    /**
+     * Cuts nodes by ID.
+     * @param ids The IDs of the nodes to cut.
+     */
+    cut(ids: List<string>): this;
+    /**
+     * Pastes the clipboard contents.
+     * @param select Should the pasted nodes be selected.
+     */
+    paste(select?: boolean): this;
+    /**
+     * Clears the clipboard.
+     */
+    clearClipboard(): this;
+    /**
+     * Copies the current selection.
+     */
+    copySelection(): this;
+    /**
+     * Cuts the current selection.
+     */
+    cutSelection(): this;
+    /**
+     * Clones the editor state.
+     */
+    clone(): this;
 }
 export {};

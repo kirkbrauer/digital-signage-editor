@@ -1,7 +1,5 @@
-import { CSSProperties } from 'react';
-import { RectangleNode } from '../model/immutable';
+/// <reference types="react" />
 import NodeComponent from './NodeComponent';
-export default class Rectangle extends NodeComponent<RectangleNode> {
-    protected getCornerStyle(cornerRadius: number | null, cornerRadii: number[]): CSSProperties;
+export default class Rectangle extends NodeComponent {
     renderStaticContent(): JSX.Element;
 }

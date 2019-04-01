@@ -1,150 +1,155 @@
 import { VectorPoint } from './VectorPoint';
 import { Sizeable } from './Sizeable';
-import { Vector } from './Vector';
-
-export interface VectorPathConfig {
-  points?: VectorPoint[];
-  open?: boolean;
-}
+import { Record, List } from 'immutable';
+import uuid from 'uuid/v4';
 
 /**
  * A vector path.
  */
-export class VectorPath extends Sizeable<VectorPathConfig, any> {
+export interface VectorPathProps {
+
+  /**
+   * The ID of the vector path.
+   */
+  id: string;
+
+  /**
+   * The absolute x position of the path.
+   */
+  x: number;
+
+   /**
+   * The absolute x position of the path.
+   */
+  y: number;
 
   /**
    * An array of points that make up the path.
    */
-  private points: VectorPoint[];
+  points: List<VectorPoint>;
 
   /**
    * Whether the path is open.
    * Paths open between their first and last points.
    */
-  private open: boolean;
+  open?: boolean;
 
-  constructor(config: VectorPathConfig) {
-    super();
-    this.points = config.points || [];
-    this.open = config.open || false;
+}
+
+const defaultVectorPath: VectorPathProps = {
+  id: '',
+  x: 0,
+  y: 0,
+  points: List()
+};
+
+export class VectorPath extends Record<VectorPathProps>(defaultVectorPath) implements Sizeable {
+
+  constructor(props?: Partial<VectorPathProps>) {
+    // Generate a unique UUID for a new vector path.
+    super(Object.assign({}, props, { id: (props && props.id) || uuid() }));
   }
 
-  public getPosition(): Vector {
-    return this.calculatePosition(this.points);
+  public getX(): number {
+    // Get the min x value
+    let minX = this.points.get(0)!.x;
+    for (const point of this.points) {
+      if (point.x < minX) {
+        minX = point.x;
+      }
+    }
+    return minX;
   }
 
-  public setPosition(position: Vector): this {
-    return this.cloneWith({
-      points: this.setChildPositions(this.points, position) as VectorPoint[]
-    });
-  }
-
-  public getHeight(): number {
-    return this.calculateHeight(this.points);
-  }
-
-  public setHeight(height: number): this {
-    return this.cloneWith({
-      points: this.setChildHeights(this.points, height) as VectorPoint[]
-    });
+  public getY(): number {
+    // Get the min y value
+    let minY = this.points.get(0)!.y;
+    for (const point of this.points) {
+      if (point.y < minY) {
+        minY = point.y;
+      }
+    }
+    return minY;
   }
 
   public getWidth(): number {
-    return this.calculateWidth(this.points);
+    let maxX = this.points.get(0)!.x;
+    let minX = this.points.get(0)!.x;
+    // Get the max and min x values
+    for (const point of this.points) {
+      if (point.x > maxX) {
+        maxX = point.x;
+      }
+      if (point.x < minX) {
+        minX = point.x;
+      }
+    }
+    // Return the max x pos minus the min x pos
+    return maxX - minX;
+  }
+
+  public getHeight(): number {
+    let maxY = this.points.get(0)!.y;
+    let minY = this.points.get(0)!.y;
+    // Get the max and min y values
+    for (const point of this.points) {
+      if (point.y > maxY) {
+        maxY = point.x;
+      }
+      if (point.y < minY) {
+        minY = point.x;
+      }
+    }
+    // Return the max y pos minus the min y pos
+    return maxY - minY;
+  }
+
+  public setX(x: number): this {
+    return this.set('points',
+      this.points.map((point) => {
+        // Calculate the offset between the point position and the path position
+        const offset = point.x - this.getX();
+        // Set the point x to the new position + the offset
+        return point.set('x', x + offset);
+      })
+    );
+  }
+
+  public setY(y: number): this {
+    return this.set('points',
+      this.points.map((point) => {
+        // Calculate the offset between the point position and the path position
+        const offset = point.y - this.getX();
+        // Set the point y to the new position + the offset
+        return point.set('y', y + offset);
+      })
+    );
   }
 
   public setWidth(width: number): this {
-    return this.cloneWith({
-      points: this.setChildWidths(this.points, width) as VectorPoint[]
-    });
+    return this.set('points',
+      this.points.map((point) => {
+        // Calculate the offset between the points's position and the paths's position
+        const offset = point.x - this.getX();
+        // Calculate the ratio of the offset to the actual width of the path
+        const posRatio = offset / this.getWidth();
+        // Set the x position of the point
+        return point.set('x', this.getX() + (posRatio * width));
+      })
+    );
   }
 
-  /**
-   * Gets the points in the vector path.
-   */
-  public getPoints(): VectorPoint[] {
-    return this.points;
+  public setHeight(height: number): this {
+    return this.set('points',
+      this.points.map((point) => {
+        // Calculate the offset between the points's position and the paths's position
+        const offset = point.y - this.getY();
+        // Calculate the ratio of the offset to the actual width of the path
+        const posRatio = offset / this.getHeight();
+        // Set the y position of the point
+        return point.set('y', this.getY() + (posRatio * height));
+      })
+    );
   }
 
-  /**
-   * Sets the points in the vector path.
-   * @param points The new points in the path.
-   */
-  public setPoints(points: VectorPoint[]): VectorPath {
-    return this.cloneWith({
-      points
-    });
-  }
-
-  /**
-   * Adds a point to the path.
-   * @param point The point to add.
-   */
-  public addPoint(point: VectorPoint): VectorPath {
-    return this.cloneWith({
-      points: [...this.points, point]
-    });
-  }
-
-  /**
-   * Removes a point from the path.
-   * @param point The point to add.
-   */
-  public removePoint(id: string): VectorPath {
-    const newPoints = [];
-    for (const point of this.points) {
-      if (point.getID() !== id) {
-        newPoints.push(point);
-      }
-    }
-    return this.cloneWith({
-      points: newPoints
-    });
-  }
-
-  /**
-   * Updates a point in the path.
-   * @param newPoint The point to update.
-   */
-  public updatePoint(newPoint: VectorPoint): VectorPath {
-    const newPoints = [];
-    for (const point of this.points) {
-      if (point.getID() === newPoint.getID()) {
-        newPoints.push(newPoint);
-      } else {
-        newPoints.push(point);
-      }
-    }
-    return this.cloneWith({
-      points: newPoints
-    });
-  }
-
-  /**
-   * Returns true if the path is open.
-   */
-  public isOpen(): boolean {
-    return this.open;
-  }
-
-  public toRaw() {}
-
-  public toJS(): VectorPathConfig {
-    return {
-      points: this.points,
-      open: this.open
-    };
-  }
-
-  public cloneWith(data: VectorPathConfig): this {
-    return (this as any).constructor({
-      ...this.toJS(),
-      ...data
-    });
-  }
-
-  public clone(): this {
-    return this.cloneWith({});
-  }
-  
 }

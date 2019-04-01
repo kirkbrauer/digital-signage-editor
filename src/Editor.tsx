@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { EditorState, Node as ImmutableNode, GroupNode as ImmutableGroupNode } from './model/immutable';
+import { EditorState, Node as ImmutableNode } from './model/immutable';
 import Node from './components/Node';
 import Group from './components/Group';
 
@@ -7,97 +7,57 @@ type OnChangeEvent = (editorState: EditorState) => void;
 
 interface EditorProps {
   editorState: EditorState;
+  shift?: boolean;
   onChange?: OnChangeEvent;
   width?: number;
   height?: number;
 }
 
-interface TempEditorState {
-  keysPressed: string[];
-}
+export default class Editor extends Component<EditorProps> {
 
-export default class Editor extends Component<EditorProps, TempEditorState> {
-
-  constructor(props: EditorProps) {
-    super(props);
-    this.state = {
-      keysPressed: []
-    };
-  }
-
-  private keyDownListener = (e: KeyboardEvent) => this.onKeyDown(e);
-  private keyUpListener = (e: KeyboardEvent) => this.onKeyUp(e);
-
-  private onKeyDown(e: KeyboardEvent) {
-    this.setState({ keysPressed: [...this.state.keysPressed, e.key] });
-  }
-
-  private onKeyUp(e: KeyboardEvent) {
-    const keysPressed = this.state.keysPressed;
-    if (keysPressed.includes(e.key)) {
-      keysPressed.splice(keysPressed.indexOf(e.key));
+  private setEditorState(editorState: EditorState) {
+    if (this.props.onChange) {
+      this.props.onChange(editorState);
     }
-    this.setState({ keysPressed });
   }
 
-  componentDidMount() {
-    document.addEventListener('keydown', this.keyDownListener);
-    document.addEventListener('keyup', this.keyUpListener);
-  }
-  
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.keyDownListener);
-    document.removeEventListener('keyup', this.keyUpListener);
+  private getEditorState() {
+    return this.props.editorState;
   }
 
   private onSelectionGroupNodeChange(node: ImmutableNode) {
-    if (this.props.onChange) {
-      const newState = this.props.editorState.updateSelectionGroup(node as ImmutableGroupNode);
-      this.props.onChange(newState);
-    }
+    const newState = this.getEditorState().updateSelectionGroup(node);
+    this.setEditorState(newState);
   }
 
   private onNodeChange(node: ImmutableNode) {
-    if (this.props.onChange) {
-      const newDocument = this.props.editorState.getDocument().updateNode(node);
-      const newState = this.props.editorState.setDocument(newDocument);
-      this.props.onChange(newState);
-    }
+    const newDocument = this.getEditorState().document.updateNode(node);
+    const newState = this.getEditorState().set('document', newDocument);
+    this.setEditorState(newState);
   }
 
   private onSelect(id: string) {
-    if (this.props.onChange) {
-      // Allow multiple selection when shift is pressed
-      const newState = this.props.editorState.select(
-        id,
-        this.state.keysPressed.includes('Shift')
-      );
-      // Stop editing the node when another node is selected
-      this.props.onChange(newState.stopEditing());
-    }
+    // Allow multiple selection when shift is pressed
+    const newState = this.getEditorState().select(id, Boolean(this.props.shift));
+    // Stop editing the node when another node is selected
+    this.setEditorState(newState.set('editing', null));
   }
 
   private onStartEditing(id: string) {
-    if (this.props.onChange) {
-      const newState = this.props.editorState.edit(id);
-      this.props.onChange(newState);
-    }
+    const newState = this.getEditorState().set('editing', id);
+    this.setEditorState(newState);
   }
 
   private onStopEditing() {
-    if (this.props.onChange) {
-      const newState = this.props.editorState.stopEditing();
-      this.props.onChange(newState);
-    }
+    const newState = this.getEditorState().set('editing', null);
+    this.setEditorState(newState);
   }
 
   private onDeselect() {
-    if (this.props.onChange) {
-      // Allow multiple selection when shift is pressed
-      if (!this.state.keysPressed.includes('Shift')) {
-        const newState = this.props.editorState.deselectAll().stopEditing();
-        this.props.onChange(newState);
-      }
+    // Allow multiple selection when shift is pressed
+    if (!this.props.shift) {
+      const newState = this.getEditorState().deselectAll().set('editing', null);
+      this.setEditorState(newState);
     }
   }
   
@@ -108,21 +68,22 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
     const yPos = e.clientY - rect.top;
     // Check if the click is outside the current selection
     // A 5 px buffer is added to accommodate the resize handles
-    const editorState = this.props.editorState;
-    if (
-      !(
-        (
-          (xPos >= editorState.getSelectionXPos() - 5) &&
-          (xPos <= (editorState.getSelectionXPos() + editorState.getSelectionWidth() + 5))
-        ) &&
-        (
-          (yPos >= editorState.getSelectionYPos() - 5) &&
-          (yPos <= (editorState.getSelectionYPos() + editorState.getSelectionHeight() + 5))
+    const editorState = this.getEditorState();
+    if (editorState.selectedIDs.count() > 0) {
+      if (
+        !(
+          (
+            (xPos >= editorState.getSelectionX() - 5) &&
+            (xPos <= (editorState.getSelectionX() + editorState.getSelectionWidth() + 5))
+          ) &&
+          (
+            (yPos >= editorState.getSelectionY() - 5) &&
+            (yPos <= (editorState.getSelectionY() + editorState.getSelectionHeight() + 5))
+          )
         )
-      )
-    ) {
-      if (this.props.onChange) {
-        this.props.onChange(editorState.deselectAll());
+      ) {
+        // Deselect all nodes
+        this.setEditorState(editorState.deselectAll().set('editing', null));
       }
     }
   }
@@ -131,54 +92,54 @@ export default class Editor extends Component<EditorProps, TempEditorState> {
     return (
       <div
         style={{
-          width: this.props.editorState.getDocument().getWidth(),
-          height: this.props.editorState.getDocument().getHeight(),
+          width: this.getEditorState().document.width,
+          height: this.getEditorState().document.height,
           position: 'relative'
         }}
         onClick={e => this.onEditorClick(e)}
       >
-        {this.props.editorState.getEditNode() ? (
-          <Node
-            key={this.props.editorState.getEditNode()!.getID()}
-            node={this.props.editorState.getEditNode()!}
-            onDeselect={() => this.onDeselect()}
-            onChange={node => this.onNodeChange(node)}
-            editing={true}
-            selected={true}
-          />) : null}
-        {this.props.editorState.getSelectionGroup() ? (
-          <Group
-            key={this.props.editorState.getSelectionGroup()!.getID()}
-            node={this.props.editorState.getSelectionGroup()!}
-            selected={true}
-            editing={false}
-            onDeselect={() => this.onDeselect()}
-            onChange={node => this.onSelectionGroupNodeChange(node)}
-          />) : null}
-        {this.props.editorState.getDocument().getNodes().map((node) => {
+        {this.getEditorState().document.nodes.reverse().map((node) => {
           // Only render the node if it isn't in the selection group or being edited
-          if (this.props.editorState.getEditId() === node.getID()) {
+          if (this.getEditorState().editing === node.id) {
             return null;
           }
-          if (this.props.editorState.getSelectedIds().length > 1) {
-            if (this.props.editorState.getSelectedIds().includes(node.getID())) {
+          if (this.getEditorState().selectedIDs.count() > 1) {
+            if (this.getEditorState().selectedIDs.includes(node.id)) {
               return null;
             }
           }
           return (
             <Node
-              key={node.getID()}
+              key={node.id}
               node={node}
-              onSelect={() => this.onSelect(node.getID())}
-              onStartEditing={() => this.onStartEditing(node.getID())}
+              onSelect={() => this.onSelect(node.id)}
+              onStartEditing={() => this.onStartEditing(node.id)}
               onStopEditing={() => this.onStopEditing()}
               onDeselect={() => this.onDeselect()}
-              selected={this.props.editorState.getSelectedIds().includes(node.getID())}
+              selected={this.getEditorState().selectedIDs.includes(node.id)}
               editing={false}
               onChange={node => this.onNodeChange(node)}
             />
           );
         })}
+        {this.getEditorState().selectionGroup ? (
+          <Group
+            key={this.getEditorState().selectionGroup!.id}
+            node={this.getEditorState().selectionGroup!}
+            selected={true}
+            editing={false}
+            onDeselect={() => this.onDeselect()}
+            onChange={node => this.onSelectionGroupNodeChange(node)}
+          />) : null}
+        {this.getEditorState().getEditNode() ? (
+          <Node
+            key={this.getEditorState().getEditNode()!.id}
+            node={this.getEditorState().getEditNode()!}
+            onDeselect={() => this.onDeselect()}
+            onChange={(node: ImmutableNode) => this.onNodeChange(node)}
+            editing={true}
+            selected={true}
+          />) : null}
       </div>
     );
   }

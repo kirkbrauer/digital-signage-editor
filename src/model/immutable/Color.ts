@@ -1,105 +1,48 @@
-import { Immutable } from './Immutable';
+import { Record } from 'immutable';
 
-export interface ColorConfig {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-}
-
-/**
- * A RGBA color.
- */
-export class Color extends Immutable<ColorConfig, any> {
+export interface IColor {
   
   /**
    * Red value between 0 and 255.
    */
-  private red: number;
+  red: number;
 
   /**
    * Green value between 0 and 255.
    */
-  private green: number;
+  green: number;
 
   /**
    * Blue value between 0 and 255.
    */
-  private blue: number;
+  blue: number;
 
   /**
    * Alpha value between 0 and 1.
    */
-  private alpha: number;
+  alpha: number;
 
-  constructor(config: ColorConfig) {
-    super();
-    this.red = config.r;
-    this.green = config.g;
-    this.blue = config.b;
-    this.alpha = config.a || 1.0;
+}
+
+const defaultColor: IColor = {
+  red: 0,
+  green: 0,
+  blue: 0,
+  alpha: 1.0
+};
+
+export class Color extends Record<IColor>(defaultColor) {
+
+  /**
+   * Converts the color to a rgba string.
+   * @param opacity The opacity of the color's parent.
+   */
+  public toString(opacity?: number): string {
+    let alpha = this.alpha;
+    if (opacity) {
+      alpha = this.alpha * opacity;
+    }
+    return `rgba(${this.red}, ${this.green}, ${this.blue}, ${alpha})`;
   }
-
-  public getRed(): number {
-    return this.red;
-  }
-
-  public setRed(red: number): Color {
-    return new Color({
-      ...this.toJS(),
-      r: red
-    });
-  }
-
-  public getGreen(): number {
-    return this.green;
-  }
-
-  public setGreen(green: number): Color {
-    return new Color({
-      ...this.toJS(),
-      g: green
-    });
-  }
-
-  public getBlue(): number {
-    return this.blue;
-  }
-
-  public setBlue(blue: number): Color {
-    return new Color({
-      ...this.toJS(),
-      b: blue
-    });
-  }
-
-  public getAlpha(): number {
-    return this.alpha;
-  }
-
-  public setAlpha(alpha: number): Color {
-    return new Color({
-      ...this.toJS(),
-      a: alpha
-    });
-  }
-
-  public toString(opacity: number = 1.0): string {
-    // Calculate the alpha
-    const alpha = opacity * this.alpha;
-    // Return a rgba color
-    return `rgba(${this.red},${this.green},${this.blue},${alpha})`;
-  }
-
-  public toJS(): ColorConfig {
-    return {
-      r: this.red,
-      g: this.green,
-      b: this.blue,
-      a: this.alpha
-    };
-  }
-
-  public toRaw() { }
 
 }

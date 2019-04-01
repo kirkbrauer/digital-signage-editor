@@ -18,7 +18,8 @@
     "skipLibCheck": true,
     "jsx": "react",
     "rootDir": "src",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "downlevelIteration": true
   },
   "exclude": [
     "node_modules",

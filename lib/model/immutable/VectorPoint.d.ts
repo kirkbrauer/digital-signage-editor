@@ -1,75 +1,43 @@
-import { Vector } from './Vector';
-import { Sizeable } from './Sizeable';
-export interface VectorPointConfig {
-    id?: string;
-    position?: Vector;
-    ctrlPointsLocked?: boolean;
-    ctrlPoint1Pos?: Vector;
-    ctrlPoint2Pos?: Vector;
-}
+import { Record } from 'immutable';
 /**
- * A point in a vector point.
+ * A vector point.
  */
-export declare class VectorPoint extends Sizeable<VectorPointConfig, any> {
+export interface VectorPointProps {
     /**
      * ID of the vector point.
      */
-    private id;
+    id: string;
     /**
-     * Absolute position of the point.
+     * The absolute x position of the point.
      */
-    private position;
+    x: number;
+    /**
+     * The absolute y position of the point.
+     */
+    y: number;
     /**
      * Whether the control points are locked.
      */
-    private ctrlPointsLocked;
+    ctrlPointsLocked?: boolean;
     /**
-     * First bezier curve control point.
+     * First bezier curve control point X position.
      */
-    private ctrlPoint2Pos;
+    ctrlPoint1X?: number;
     /**
-     * Second bezier curve control point.
+     * First bezier curve control point Y position.
      */
-    private ctrlPoint1Pos;
-    constructor(config: VectorPointConfig);
-    getID(): string;
-    getPosition(): Vector;
-    setPosition(position: Vector): this;
-    getHeight(): number;
-    setHeight(height: number): this;
-    getWidth(): number;
-    setWidth(width: number): this;
+    ctrlPoint1Y?: number;
     /**
-     * Returns true if the vector point control points are locked.
+     * Second bezier curve control point X position.
      */
-    areCtrlPointsLocked(): boolean;
+    ctrlPoint2X?: number;
     /**
-     * Locks the vector control points.
+     * Second bezier curve control point Y position.
      */
-    lockCtrlPoints(): VectorPoint;
-    /**
-     * Unlocks the vector control points.
-     */
-    unlockCtrlPoints(): VectorPoint;
-    /**
-     * Returns the position of the first control point.
-     */
-    getCtrlPoint1Pos(): Vector;
-    /**
-     * Sets the position of the first control point.
-     * @param setCtrlPoint1Pos The new position of the control point.
-     */
-    setCtrlPoint1Pos(ctrlPoint1Pos: Vector): VectorPoint;
-    /**
-     * Returns the position of the second control point.
-     */
-    getCtrlPoint2Pos(): Vector;
-    /**
-     * Sets the position of the second control point.
-     * @param ctrlPoint2Pos The new position of the control point.
-     */
-    setCtrlPoint2Pos(ctrlPoint2Pos: Vector): VectorPoint;
-    toRaw(): void;
-    toJS(): VectorPointConfig;
-    cloneWith(data: VectorPointConfig): this;
+    ctrlPoint2Y?: number;
 }
+declare const VectorPoint_base: Record.Factory<VectorPointProps>;
+export declare class VectorPoint extends VectorPoint_base {
+    constructor(props?: Partial<VectorPointProps>);
+}
+export {};
