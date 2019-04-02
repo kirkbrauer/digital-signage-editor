@@ -85,6 +85,18 @@ abstract class NodeComponent extends Component<NodeProps> {
         </div>
       );
     }
+    if (this.props.readOnly) {
+      return (
+        <div style={{
+          transform: `translate(${node.getX()}px, ${node.getY()}px)`,
+          height: node.getHeight(),
+          width: node.getWidth(),
+          position: 'absolute',
+        }}>
+          {this.renderStaticContent()}
+        </div>
+      );
+    }
     return (
       <div
         onDoubleClick={() => {

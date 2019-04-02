@@ -164,46 +164,16 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     super({ ...props, id: (props && props.id) || uuid() });
   }
 
-  /**
-   * Calculates the x position of a node containing sizeables.
-   * @param sizeables The sizeables to base the position calculation.
-   */
-  private calculateX(sizeables: List<Sizeable>): number {
-    // Get the min x values
-    let minX = sizeables.get(0)!.getX();
-    for (const sizeable of sizeables) {
-      if (sizeable.getX() < minX) {
-        minX = sizeable.getX();
-      }
-    }
-    return minX;
-  }
-
-  /**
-   * Calculates the y position of a node containing sizeables.
-   * @param sizeables The sizeables to base the position calculation.
-   */
-  private calculateY(sizeables: List<Sizeable>): number {
-    // Get the min y values
-    let minY = sizeables.get(0)!.getY();
-    for (const sizeable of sizeables) {
-      if (sizeable.getY() < minY) {
-        minY = sizeable.getY();
-      }
-    }
-    return minY;
-  }
-
   public getX(): number {
     // Return the x pos if the node has the property
     if (this.x !== null) {
       return this.x;
     }
     if (this.type === NodeType.GROUP) {
-      return this.calculateX(this.nodes!);
+      return Sizeable.calculateX(this.nodes!);
     }
     if (this.type === NodeType.VECTOR) {
-      return this.calculateX(this.paths!);
+      return Sizeable.calculateX(this.paths!);
     }
     return 0;
   }
@@ -214,44 +184,12 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
       return this.y;
     }
     if (this.type === NodeType.GROUP) {
-      return this.calculateY(this.nodes!);
+      return Sizeable.calculateY(this.nodes!);
     }
     if (this.type === NodeType.VECTOR) {
-      return this.calculateY(this.paths!);
+      return Sizeable.calculateY(this.paths!);
     }
     return 0;
-  }
-
-  /**
-   * Calculates the width of a node containing sizeables.
-   * @param sizeables The sizeables to base the size calculation.
-   */
-  private calculateWidth<T extends Sizeable>(sizeables: List<T>): number {
-    // Find the maximum x positions of the sizeables
-    let maxX = sizeables.get(0)!.getX() + sizeables.get(0)!.getWidth();
-    for (const sizeable of sizeables) {
-      if (sizeable.getX() + sizeable.getWidth() > maxX) {
-        maxX = sizeable.getX() + sizeable.getWidth();
-      }
-    }
-    // Return the max x minus the min x
-    return maxX - this.getX();
-  }
-
-  /**
-   * Calculates the height of a node containing sizeables.
-   * @param sizeables The sizeables to base the size calculation.
-   */
-  private calculateHeight<T extends Sizeable>(sizeables: List<T>): number {
-    // Find the maximum y positions of the sizeables
-    let maxY = sizeables.get(0)!.getY() + sizeables.get(0)!.getHeight();
-    for (const sizeable of sizeables) {
-      if (sizeable.getY() + sizeable.getHeight() > maxY) {
-        maxY = sizeable.getY() + sizeable.getHeight();
-      }
-    }
-    // Return the max x minus the min x
-    return maxY - this.getY();
   }
 
   public getWidth(): number {
@@ -260,10 +198,10 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
       return this.width;
     }
     if (this.type === NodeType.GROUP) {
-      return this.calculateWidth(this.nodes!);
+      return Sizeable.calculateWidth(this.nodes!, this.getX());
     }
     if (this.type === NodeType.VECTOR) {
-      return this.calculateWidth(this.paths!);
+      return Sizeable.calculateWidth(this.paths!, this.getX());
     }
     return 0;
   }
@@ -274,40 +212,12 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
       return this.height;
     }
     if (this.type === NodeType.GROUP) {
-      return this.calculateHeight(this.nodes!);
+      return Sizeable.calculateHeight(this.nodes!, this.getY());
     }
     if (this.type === NodeType.VECTOR) {
-      return this.calculateHeight(this.paths!);
+      return Sizeable.calculateHeight(this.paths!, this.getY());
     }
     return 0;
-  }
-
-  /**
-   * Sets the x positions of sizeables based on the the computed x position of the node.
-   * @param sizeables The sizeables to update.
-   * @param x The new x position of the node.
-   */
-  private setSizeableXPositions<T extends Sizeable>(sizeables: List<T>, x: number): List<T> {
-    return sizeables.map((sizeable) => {
-      // Calculate the offset between the sizeable position and the node position
-      const offset = sizeable.getX() - this.getX();
-      // Set the node x to the new position + the offset
-      return sizeable.setX(x + offset);
-    });
-  }
-
-  /**
-   * Sets the y positions of sizeables based on the the computed y position of the node.
-   * @param sizeables The sizeables to update.
-   * @param y The new y position of the node.
-   */
-  private setSizeableYPositions<T extends Sizeable>(sizeables: List<T>, y: number): List<T> {
-    return sizeables.map((sizeable) => {
-      // Calculate the offset between the sizeable position and the node position
-      const offset = sizeable.getY() - this.getY();
-      // Set the node y to the new position + the offset
-      return sizeable.setY(y + offset);
-    });
   }
 
   public setX(x: number): this {
@@ -316,12 +226,12 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     }
     if (this.type === NodeType.GROUP) {
       return this.set('nodes',
-        this.setSizeableXPositions(this.nodes!, x)
+        Sizeable.setSizeableXPositions(this.nodes!, this.getX(), x)
       );
     }
     if (this.type === NodeType.VECTOR) {
       return this.set('paths',
-        this.setSizeableXPositions(this.paths!, x)
+        Sizeable.setSizeableXPositions(this.paths!, this.getX(), x)
       );
     }
     return this;
@@ -333,51 +243,15 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     }
     if (this.type === NodeType.GROUP) {
       return this.set('nodes',
-        this.setSizeableYPositions(this.nodes!, y)
+        Sizeable.setSizeableYPositions(this.nodes!, this.getY(), y)
       );
     }
     if (this.type === NodeType.VECTOR) {
       return this.set('paths',
-        this.setSizeableYPositions(this.paths!, y)
+        Sizeable.setSizeableYPositions(this.paths!, this.getY(), y)
       );
     }
     return this;
-  }
-
-  /**
-   * Sets the widths of sizeables based on the the computed width of the node.
-   * @param sizeables The sizeables to update.
-   * @param width The new width of the node.
-   */
-  private setSizeableWidths<T extends Sizeable>(sizeables: List<T>, width: number): List<T> {
-    return sizeables.map((sizeable) => {
-      // Calculate the ratio of the width of the sizeable to the node's width
-      const widthRatio = sizeable.getWidth() / this.getWidth();
-      // Calculate the offset between the sizeable's position and the node's position
-      const offset = sizeable.getX() - this.getX();
-      // Calculate the ratio of the offset to the actual width of the node
-      const posRatio = offset / this.getWidth();
-      // Set the x position and width of the node
-      return sizeable.setX(this.getX() + (posRatio * width)).setWidth(widthRatio * width);
-    });
-  }
-
-  /**
-   * Sets the heights of sizeables based on the the computed height of the node.
-   * @param sizeables The sizeables to update.
-   * @param height The new height of the node.
-   */
-  private setSizeableHeights<T extends Sizeable>(sizeables: List<T>, width: number): List<T> {
-    return sizeables.map((sizeable) => {
-      // Calculate the ratio of the height of the sizeable to the node's height
-      const heightRatio = sizeable.getHeight() / this.getHeight();
-      // Calculate the offset between the sizeable's position and the node's position
-      const offset = sizeable.getY() - this.getY();
-      // Calculate the ratio of the offset to the actual height of the node
-      const posRatio = offset / this.getHeight();
-      // Set the y position and height of the node
-      return sizeable.setY(this.getY() + (posRatio * width)).setHeight(heightRatio * width);
-    });
   }
 
   public setWidth(width: number): this {
@@ -386,12 +260,12 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     }
     if (this.type === NodeType.GROUP) {
       return this.set('nodes',
-        this.setSizeableWidths(this.nodes!, width)
+        Sizeable.setSizeableWidths(this.nodes!, this.getX(), this.getWidth(), width)
       );
     }
     if (this.type === NodeType.VECTOR) {
       return this.set('paths',
-        this.setSizeableWidths(this.paths!, width)
+        Sizeable.setSizeableWidths(this.paths!, this.getX(), this.getWidth(), width)
       );
     }
     return this;
@@ -403,12 +277,12 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     }
     if (this.type === NodeType.GROUP) {
       return this.set('nodes',
-        this.setSizeableHeights(this.nodes!, height)
+        Sizeable.setSizeableHeights(this.nodes!, this.getY(), this.getHeight(), height)
       );
     }
     if (this.type === NodeType.VECTOR) {
       return this.set('paths',
-        this.setSizeableHeights(this.paths!, height)
+        Sizeable.setSizeableHeights(this.paths!, this.getY(), this.getHeight(), height)
       );
     }
     return this;

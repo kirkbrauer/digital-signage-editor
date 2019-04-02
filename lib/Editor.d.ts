@@ -7,11 +7,12 @@ interface EditorProps {
     onChange?: OnChangeEvent;
     width?: number;
     height?: number;
+    readOnly?: boolean;
 }
 export default class Editor extends Component<EditorProps> {
     private setEditorState;
     private getEditorState;
-    private onSelectionGroupNodeChange;
+    private onSelectionChange;
     private onNodeChange;
     private onSelect;
     private onStartEditing;

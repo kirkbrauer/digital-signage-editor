@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { EditorState, Node as ImmutableNode } from './model/immutable';
 import Node from './components/Node';
-import Group from './components/Group';
+import Selection from './components/Selection';
+import { List } from 'immutable';
 
 type OnChangeEvent = (editorState: EditorState) => void;
 
@@ -11,6 +12,7 @@ interface EditorProps {
   onChange?: OnChangeEvent;
   width?: number;
   height?: number;
+  readOnly?: boolean;
 }
 
 export default class Editor extends Component<EditorProps> {
@@ -25,9 +27,14 @@ export default class Editor extends Component<EditorProps> {
     return this.props.editorState;
   }
 
-  private onSelectionGroupNodeChange(node: ImmutableNode) {
-    const newState = this.getEditorState().updateSelectionGroup(node);
-    this.setEditorState(newState);
+  private onSelectionChange(nodes: List<ImmutableNode>) {
+    if (this.props.onChange) {
+      this.props.onChange(
+        this.getEditorState().set('document',
+          this.getEditorState().document.updateNodes(nodes)
+        )
+      );
+    }
   }
 
   private onNodeChange(node: ImmutableNode) {
@@ -98,16 +105,9 @@ export default class Editor extends Component<EditorProps> {
         }}
         onClick={e => this.onEditorClick(e)}
       >
-        {this.getEditorState().document.nodes.reverse().map((node) => {
-          // Only render the node if it isn't in the selection group or being edited
-          if (this.getEditorState().editing === node.id) {
-            return null;
-          }
-          if (this.getEditorState().selectedIDs.count() > 1) {
-            if (this.getEditorState().selectedIDs.includes(node.id)) {
-              return null;
-            }
-          }
+        {this.getEditorState().document.nodes.reverse().filterNot((node) => {
+          return this.getEditorState().editing === node.id;
+        }).map((node) => {
           return (
             <Node
               key={node.id}
@@ -119,18 +119,10 @@ export default class Editor extends Component<EditorProps> {
               selected={this.getEditorState().selectedIDs.includes(node.id)}
               editing={false}
               onChange={node => this.onNodeChange(node)}
+              readOnly={this.props.readOnly || (this.getEditorState().selectedIDs.includes(node.id) && this.getEditorState().selectedIDs.count() > 1)}
             />
           );
         })}
-        {this.getEditorState().selectionGroup ? (
-          <Group
-            key={this.getEditorState().selectionGroup!.id}
-            node={this.getEditorState().selectionGroup!}
-            selected={true}
-            editing={false}
-            onDeselect={() => this.onDeselect()}
-            onChange={node => this.onSelectionGroupNodeChange(node)}
-          />) : null}
         {this.getEditorState().getEditNode() ? (
           <Node
             key={this.getEditorState().getEditNode()!.id}
@@ -140,6 +132,12 @@ export default class Editor extends Component<EditorProps> {
             editing={true}
             selected={true}
           />) : null}
+        {this.getEditorState().selectedIDs.count() > 1 ? (
+          <Selection
+            nodes={this.getEditorState().getSelectedNodes()}
+            onChange={nodes => this.onSelectionChange(nodes)}
+          />
+        ) : null}
       </div>
     );
   }

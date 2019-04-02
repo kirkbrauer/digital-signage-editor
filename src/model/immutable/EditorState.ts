@@ -1,6 +1,7 @@
 import { Record, List } from 'immutable';
 import { Document } from './Document';
-import { Node, NodeType } from './Node';
+import { Node } from './Node';
+import { Sizeable } from './Sizeable';
 import uuid from 'uuid';
 
 export interface IEditorState {
@@ -25,18 +26,13 @@ export interface IEditorState {
    */
   clipboard: List<Node>;
 
-  /**
-   * A node representing the selection group.
-   */
-  selectionGroup: Node | null;
 }
 
 const defaultEditorState: IEditorState = {
   document: new Document(),
   selectedIDs: List(),
   editing: null,
-  clipboard: List(),
-  selectionGroup: null
+  clipboard: List()
 };
 
 export class EditorState extends Record<IEditorState>(defaultEditorState) {
@@ -53,52 +49,28 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    * Returns the x position of the current selection.
    */
   public getSelectionX(): number {
-    if (this.selectedIDs.count() === 1) {
-      return this.document.getNodeByID(this.selectedIDs.get(0))!.getX();
-    }
-    if (this.selectionGroup) {
-      return this.selectionGroup.getX();
-    }
-    return 0;
+    return Sizeable.calculateX(this.getSelectedNodes());
   }
 
   /**
    * Returns the y position of the current selection.
    */
   public getSelectionY(): number {
-    if (this.selectedIDs.count() === 1) {
-      return this.document.getNodeByID(this.selectedIDs.get(0))!.getY();
-    }
-    if (this.selectionGroup) {
-      return this.selectionGroup.getY();
-    }
-    return 0;
+    return Sizeable.calculateY(this.getSelectedNodes());
   }
 
   /**
    * Returns the width of the current selection.
    */
   public getSelectionWidth(): number {
-    if (this.selectedIDs.count() === 1) {
-      return this.document.getNodeByID(this.selectedIDs.get(0))!.getWidth();
-    }
-    if (this.selectionGroup) {
-      return this.selectionGroup.getWidth();
-    }
-    return 0;
+    return Sizeable.calculateWidth(this.getSelectedNodes(), this.getSelectionX());
   }
 
   /**
    * Returns the height of the current selection.
    */
   public getSelectionHeight(): number {
-    if (this.selectedIDs.count() === 1) {
-      return this.document.getNodeByID(this.selectedIDs.get(0))!.getHeight();
-    }
-    if (this.selectionGroup) {
-      return this.selectionGroup.getHeight();
-    }
-    return 0;
+    return Sizeable.calculateHeight(this.getSelectedNodes(), this.getSelectionY());
   }
 
   /**
@@ -119,41 +91,21 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
   }
 
   /**
-   * Updates the selction group.
-   * The function also syncronizes the document with the selection group.
-   * @param node The new selection group.
-   */
-  public updateSelectionGroup(node: Node): this {
-    return this
-      .set('selectionGroup', node)
-      .set('document',
-        this.document.updateNodes(node.nodes!)
-      );
-  }
-
-  /**
    * Selects a node.
    * @param id The ID of the node to select.
    * @param multiple Should multiple nodes be allowed to be selected.
    */
   public select(id: string, multiple: boolean): this {
-    const newState = this.set('selectedIDs',
+    return this.set('selectedIDs',
       multiple ? this.selectedIDs.push(id) : List.of(id)
     );
-    if (multiple && newState.selectedIDs.count() > 1) {
-      return newState.set('selectionGroup', new Node({
-        type: NodeType.GROUP,
-        nodes: newState.getSelectedNodes()
-      }));
-    }
-    return newState.set('selectionGroup', null);
   }
 
   /**
    * Deselects all nodes.
    */
   public deselectAll(): this {
-    return this.set('selectedIDs', List()).set('selectionGroup', null);
+    return this.set('selectedIDs', List());
   }
 
   /**
@@ -232,7 +184,7 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    * Cuts the current selection.
    */
   public cutSelection(): this {
-    return this.cut(this.selectedIDs).set('selectedIDs', List()).set('selectionGroup', null);
+    return this.cut(this.selectedIDs).set('selectedIDs', List());
   }
 
   /**

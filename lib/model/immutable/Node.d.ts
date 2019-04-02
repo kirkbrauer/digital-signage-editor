@@ -111,56 +111,12 @@ export interface INode {
 declare const Node_base: Record.Factory<INode>;
 export declare class Node extends Node_base implements Sizeable {
     constructor(props?: Partial<INode>);
-    /**
-     * Calculates the x position of a node containing sizeables.
-     * @param sizeables The sizeables to base the position calculation.
-     */
-    private calculateX;
-    /**
-     * Calculates the y position of a node containing sizeables.
-     * @param sizeables The sizeables to base the position calculation.
-     */
-    private calculateY;
     getX(): number;
     getY(): number;
-    /**
-     * Calculates the width of a node containing sizeables.
-     * @param sizeables The sizeables to base the size calculation.
-     */
-    private calculateWidth;
-    /**
-     * Calculates the height of a node containing sizeables.
-     * @param sizeables The sizeables to base the size calculation.
-     */
-    private calculateHeight;
     getWidth(): number;
     getHeight(): number;
-    /**
-     * Sets the x positions of sizeables based on the the computed x position of the node.
-     * @param sizeables The sizeables to update.
-     * @param x The new x position of the node.
-     */
-    private setSizeableXPositions;
-    /**
-     * Sets the y positions of sizeables based on the the computed y position of the node.
-     * @param sizeables The sizeables to update.
-     * @param y The new y position of the node.
-     */
-    private setSizeableYPositions;
     setX(x: number): this;
     setY(y: number): this;
-    /**
-     * Sets the widths of sizeables based on the the computed width of the node.
-     * @param sizeables The sizeables to update.
-     * @param width The new width of the node.
-     */
-    private setSizeableWidths;
-    /**
-     * Sets the heights of sizeables based on the the computed height of the node.
-     * @param sizeables The sizeables to update.
-     * @param height The new height of the node.
-     */
-    private setSizeableHeights;
     setWidth(width: number): this;
     setHeight(height: number): this;
     /**

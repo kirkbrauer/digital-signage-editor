@@ -36,6 +36,7 @@ export default class Text extends NodeComponent {
           <Editor
             ref={this.editorRef}
             editorState={this.props.node.editorState!}
+            readOnly={this.props.readOnly}
             onFocus={() => {
               if (this.dragging) {
                 // Prevent selection while dragging

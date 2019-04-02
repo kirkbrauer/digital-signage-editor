@@ -18,10 +18,6 @@ export interface IEditorState {
      * The current clipboard contents.
      */
     clipboard: List<Node>;
-    /**
-     * A node representing the selection group.
-     */
-    selectionGroup: Node | null;
 }
 declare const EditorState_base: Record.Factory<IEditorState>;
 export declare class EditorState extends EditorState_base {
@@ -54,12 +50,6 @@ export declare class EditorState extends EditorState_base {
      * Returns a list of currently selected nodes.
      */
     getSelectedNodes(): List<Node>;
-    /**
-     * Updates the selction group.
-     * The function also syncronizes the document with the selection group.
-     * @param node The new selection group.
-     */
-    updateSelectionGroup(node: Node): this;
     /**
      * Selects a node.
      * @param id The ID of the node to select.

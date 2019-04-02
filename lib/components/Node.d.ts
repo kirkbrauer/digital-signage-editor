@@ -7,6 +7,7 @@ export interface NodeProps {
     groupY?: number;
     selected?: boolean;
     editing?: boolean;
+    readOnly?: boolean;
     onStartEditing?: () => void;
     onStopEditing?: () => void;
     onSelect?: () => void;
