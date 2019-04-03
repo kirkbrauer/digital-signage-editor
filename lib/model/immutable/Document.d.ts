@@ -77,5 +77,35 @@ export declare class Document extends Document_base {
      * @param nodes The nodes to add.
      */
     addNodes(nodes: List<Node>): this;
+    /**
+     * Changes a node's index in the node list.
+     * @param id The ID of the node to change the index of.
+     * @param delta How many places to move the node in the list.
+     */
+    private changeNodeIndex;
+    /**
+     * Brings nodes to front.
+     * @param ids The IDs of the nodes to bring to front.
+     */
+    bringToFront(ids: List<string>): this;
+    /**
+     * Sends nodes to back.
+     * @param ids The IDs of the nodes to send to back.
+     */
+    sendToBack(ids: List<string>): this;
+    /**
+     * Brings nodes one level forward.
+     * @param ids The IDs of the nodes to bring forward.
+     */
+    bringForward(ids: List<string>): this;
+    /**
+     * Sends nodes one level back.
+     * @param ids The IDs of the nodes to send back.
+     */
+    sendBackward(ids: List<string>): this;
+    /**
+     * Clones the document.
+     */
+    clone(): this;
 }
 export {};

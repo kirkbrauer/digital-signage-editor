@@ -18,7 +18,11 @@ export default class Editor extends Component<EditorProps> {
     private onStartEditing;
     private onStopEditing;
     private onDeselect;
-    private onEditorClick;
+    private getCursorPosition;
+    private cursorOutsideSelection;
+    private onMouseDown;
+    private onMouseMove;
+    private onMouseUp;
     render(): JSX.Element;
 }
 export {};

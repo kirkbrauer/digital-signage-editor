@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { EditorState, Node as ImmutableNode } from './model/immutable';
+import { EditorState, Node as ImmutableNode, SelectionBox as ImmutableSelectionBox } from './model/immutable';
 import Node from './components/Node';
 import Selection from './components/Selection';
 import { List } from 'immutable';
+import SelectionBox from './components/SelectionBox';
 
 type OnChangeEvent = (editorState: EditorState) => void;
 
@@ -44,10 +45,11 @@ export default class Editor extends Component<EditorProps> {
   }
 
   private onSelect(id: string) {
+    // Clear the selection box
     // Allow multiple selection when shift is pressed
     const newState = this.getEditorState().select(id, Boolean(this.props.shift));
     // Stop editing the node when another node is selected
-    this.setEditorState(newState.set('editing', null));
+    this.setEditorState(newState.set('editing', null).set('selectionBox', null));
   }
 
   private onStartEditing(id: string) {
@@ -67,31 +69,86 @@ export default class Editor extends Component<EditorProps> {
       this.setEditorState(newState);
     }
   }
-  
-  private onEditorClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+
+  private getCursorPosition(e: React.MouseEvent<HTMLDivElement, MouseEvent>): { x: number; y: number; } {
     // Get the x and y position of the click relative to the editor element
     const rect = e.currentTarget.getBoundingClientRect();
-    const xPos = e.clientX - rect.left;
-    const yPos = e.clientY - rect.top;
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+
+  private cursorOutsideSelection(e: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
+    const cursorPosition = this.getCursorPosition(e);
     // Check if the click is outside the current selection
     // A 5 px buffer is added to accommodate the resize handles
     const editorState = this.getEditorState();
-    if (editorState.selectedIDs.count() > 0) {
+    if (!editorState.selectedIDs.isEmpty()) {
       if (
         !(
           (
-            (xPos >= editorState.getSelectionX() - 5) &&
-            (xPos <= (editorState.getSelectionX() + editorState.getSelectionWidth() + 5))
+            (cursorPosition.x >= editorState.getSelectionX() - 5) &&
+            (cursorPosition.x <= (editorState.getSelectionX() + editorState.getSelectionWidth() + 5))
           ) &&
           (
-            (yPos >= editorState.getSelectionY() - 5) &&
-            (yPos <= (editorState.getSelectionY() + editorState.getSelectionHeight() + 5))
+            (cursorPosition.y >= editorState.getSelectionY() - 5) &&
+            (cursorPosition.y <= (editorState.getSelectionY() + editorState.getSelectionHeight() + 5))
           )
         )
       ) {
-        // Deselect all nodes
-        this.setEditorState(editorState.deselectAll().set('editing', null));
+        return true;
       }
+      return false;
+    }
+    return true;
+  }
+
+  private onMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    if (this.cursorOutsideSelection(e)) {
+      // Get the cursor position from the event
+      const cursorPosition = this.getCursorPosition(e);
+      // Create an empty selection box
+      this.setEditorState(
+        this.getEditorState().set('selectionBox',
+          new ImmutableSelectionBox({
+            startX: cursorPosition.x,
+            startY: cursorPosition.y,
+            cursorX: cursorPosition.x,
+            cursorY: cursorPosition.y
+          })
+        )
+          .deselectAll() // Deselect all nodes before allowing selection
+          .set('editing', null) // Stop editing the currently edited node
+      );
+    }
+  }
+
+  private onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    // Update the selection box cursor position on mouse move
+    if (this.getEditorState().selectionBox) {
+      // Get the cursor position from the event
+      const cursorPosition = this.getCursorPosition(e);
+      // Set the cursor position of the selection box.
+      let newState = this.getEditorState()
+        .setIn(['selectionBox', 'cursorX'], cursorPosition.x)
+        .setIn(['selectionBox', 'cursorY'], cursorPosition.y);
+      // Select nodes if they are inside the selection box
+      for (const node of newState.document.nodes) {
+        if (newState.selectionBox!.includes(node)) {
+          newState = newState.select(node.id, true);
+        } else {
+          newState = newState.deselect(node.id);
+        }
+      }
+      this.setEditorState(newState);
+    }
+  }
+
+  private onMouseUp(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    // Clear the selection box at the end of the selection
+    if (this.getEditorState().selectionBox) {
+      this.setEditorState(this.getEditorState().set('selectionBox', null));
     }
   }
 
@@ -103,7 +160,9 @@ export default class Editor extends Component<EditorProps> {
           height: this.getEditorState().document.height,
           position: 'relative'
         }}
-        onClick={e => this.onEditorClick(e)}
+        onMouseDown={e => this.onMouseDown(e)}
+        onMouseMove={e => this.onMouseMove(e)}
+        onMouseUp={e => this.onMouseUp(e)}
       >
         {this.getEditorState().document.nodes.reverse().filterNot((node) => {
           return this.getEditorState().editing === node.id;
@@ -138,6 +197,9 @@ export default class Editor extends Component<EditorProps> {
             onChange={nodes => this.onSelectionChange(nodes)}
           />
         ) : null}
+        {this.getEditorState().selectionBox ?
+          <SelectionBox box={this.getEditorState().selectionBox!} />
+          : null}
       </div>
     );
   }

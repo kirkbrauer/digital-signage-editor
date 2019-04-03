@@ -171,4 +171,82 @@ export class Document extends Record<IDocument>(defaultDocument) {
     return this.set('nodes', List([...nodes, ...this.nodes]));
   }
 
+  /**
+   * Changes a node's index in the node list.
+   * @param id The ID of the node to change the index of.
+   * @param delta How many places to move the node in the list.
+   */
+  private changeNodeIndex(id: string, delta: number): this {
+    // Find the current index of the node
+    const index = this.nodes.findIndex(node => node.id === id);
+    const newIndex = index + delta;
+    // Do nothing if the node is already at the top or bottom
+    if (newIndex < 0 || newIndex === this.nodes.count()) return this.clone();
+    // Sort the indexes
+    const indexes = [index, newIndex].sort((a, b) => a - b); 
+    // Replace from lowest index, two elements, reverting the order
+    return this.set('nodes',
+      this.nodes.splice(indexes[0], 2, this.nodes.get(indexes[1])!, this.nodes.get(indexes[0])!)
+    );
+  }
+
+  /**
+   * Brings nodes to front.
+   * @param ids The IDs of the nodes to bring to front.
+   */
+  public bringToFront(ids: List<string>): this {
+    const nodes = this.getNodesByID(ids);
+    return this.set('nodes', List([
+      ...nodes,
+      ...this.nodes.filterNot((node) => {
+        return ids.includes(node.id);
+      })
+    ]));
+  }
+
+  /**
+   * Sends nodes to back.
+   * @param ids The IDs of the nodes to send to back.
+   */
+  public sendToBack(ids: List<string>): this {
+    const nodes = this.getNodesByID(ids);
+    return this.set('nodes', List([
+      ...this.nodes.filterNot((node) => {
+        return ids.includes(node.id);
+      }),
+      ...nodes
+    ]));
+  }
+
+  /**
+   * Brings nodes one level forward.
+   * @param ids The IDs of the nodes to bring forward.
+   */
+  public bringForward(ids: List<string>): this {
+    let newDocument = this.clone();
+    for (const id of ids) {
+      newDocument = newDocument.changeNodeIndex(id, -1);
+    }
+    return newDocument;
+  }
+
+  /**
+   * Sends nodes one level back.
+   * @param ids The IDs of the nodes to send back.
+   */
+  public sendBackward(ids: List<string>): this {
+    let newDocument = this.clone();
+    for (const id of ids) {
+      newDocument = newDocument.changeNodeIndex(id, 1);
+    }
+    return newDocument;
+  }
+
+  /**
+   * Clones the document.
+   */
+  public clone(): this {
+    return this;
+  }
+
 }

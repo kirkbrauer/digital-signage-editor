@@ -3,6 +3,7 @@ import { Document } from './Document';
 import { Node } from './Node';
 import { Sizeable } from './Sizeable';
 import uuid from 'uuid';
+import { SelectionBox } from './SelectionBox';
 
 export interface IEditorState {
 
@@ -26,13 +27,19 @@ export interface IEditorState {
    */
   clipboard: List<Node>;
 
+  /**
+   * The user's selection box.
+   */
+  selectionBox: SelectionBox | null;
+
 }
 
 const defaultEditorState: IEditorState = {
   document: new Document(),
   selectedIDs: List(),
   editing: null,
-  clipboard: List()
+  clipboard: List(),
+  selectionBox: null
 };
 
 export class EditorState extends Record<IEditorState>(defaultEditorState) {
@@ -101,6 +108,12 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
     );
   }
 
+  public deselect(id: string): this {
+    return this.set('selectedIDs',
+      this.selectedIDs.filterNot(nodeId => nodeId === id)
+    );
+  }
+
   /**
    * Deselects all nodes.
    */
@@ -112,11 +125,7 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    * Selects all nodes in the document.
    */
   public selectAll(): this {
-    let newState = this.clone();
-    for (const id of this.selectedIDs) {
-      newState = this.select(id, true);
-    }
-    return newState;
+    return this.set('selectedIDs', this.document.getNodeIDs());
   }
 
   /**

@@ -113,11 +113,9 @@ abstract class NodeComponent extends Component<NodeProps> {
             x: node.getX(),
             y: node.getY()
           }}
-          onStart={() => {
-            if (this.props.onSelect) this.props.onSelect();
-          }}
           onDrag={(e) => {
             this.dragging = true;
+            if (this.props.onSelect && !this.props.selected) this.props.onSelect();
             e.stopPropagation();
           }}
           onStop={(e, data) => {

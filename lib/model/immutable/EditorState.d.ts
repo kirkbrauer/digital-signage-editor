@@ -1,6 +1,7 @@
 import { Record, List } from 'immutable';
 import { Document } from './Document';
 import { Node } from './Node';
+import { SelectionBox } from './SelectionBox';
 export interface IEditorState {
     /**
      * Current document.
@@ -18,6 +19,10 @@ export interface IEditorState {
      * The current clipboard contents.
      */
     clipboard: List<Node>;
+    /**
+     * The user's selection box.
+     */
+    selectionBox: SelectionBox | null;
 }
 declare const EditorState_base: Record.Factory<IEditorState>;
 export declare class EditorState extends EditorState_base {
@@ -56,6 +61,7 @@ export declare class EditorState extends EditorState_base {
      * @param multiple Should multiple nodes be allowed to be selected.
      */
     select(id: string, multiple: boolean): this;
+    deselect(id: string): this;
     /**
      * Deselects all nodes.
      */
