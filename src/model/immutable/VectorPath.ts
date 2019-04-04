@@ -2,6 +2,7 @@ import { VectorPoint } from './VectorPoint';
 import { Sizeable } from './Sizeable';
 import { Record, List } from 'immutable';
 import uuid from 'uuid/v4';
+import { BoundingBox } from './BoundingBox';
 
 /**
  * A vector path.
@@ -48,6 +49,24 @@ export class VectorPath extends Record<VectorPathProps>(defaultVectorPath) imple
   constructor(props?: Partial<VectorPathProps>) {
     // Generate a unique UUID for a new vector path.
     super(Object.assign({}, props, { id: (props && props.id) || uuid() }));
+  }
+
+  public getBoundingBox() {
+    return new BoundingBox({
+      x: this.getX(),
+      y: this.getY(),
+      width: this.getWidth(),
+      height: this.getHeight()
+    });
+  }
+
+  public getSize() {
+    return new BoundingBox({
+      x: this.getX(),
+      y: this.getY(),
+      width: this.getWidth(),
+      height: this.getHeight()
+    });
   }
 
   public getX(): number {

@@ -6,6 +6,7 @@ import { Fill } from './Fill';
 import { EditorState } from 'draft-js';
 import uuid from 'uuid/v4';
 import { CSSProperties } from 'react';
+import { BoundingBox } from './BoundingBox';
 
 /**
  * Defines node types.
@@ -131,6 +132,12 @@ export interface INode {
    * An array of corner radii for rectangles.
    */
   cornerRadii: List<number> | null;
+
+  /**
+   * The rotation of the node in degrees.
+   * 0-359 degrees.
+   */
+  rotation: number;
   
 }
 
@@ -154,7 +161,8 @@ const defaultNode: INode = {
   strokeAlign: StrokeAlign.CENTER,
   editorState: EditorState.createEmpty(),
   cornerRadius: null,
-  cornerRadii: null
+  cornerRadii: null,
+  rotation: 0
 };
 
 export class Node extends Record<INode>(defaultNode) implements Sizeable {
@@ -162,6 +170,24 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
   constructor(props?: Partial<INode>) {
     // Generate a unique ID for each node if none is provided
     super({ ...props, id: (props && props.id) || uuid() });
+  }
+
+  public getBoundingBox() {
+    return new BoundingBox({
+      x: this.getX(),
+      y: this.getY(),
+      width: this.getWidth(),
+      height: this.getHeight()
+    });
+  }
+
+  public getSize() {
+    return new BoundingBox({
+      x: this.getX(),
+      y: this.getY(),
+      width: this.getWidth(),
+      height: this.getHeight()
+    });
   }
 
   public getX(): number {

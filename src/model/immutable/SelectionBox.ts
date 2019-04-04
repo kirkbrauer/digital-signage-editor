@@ -1,5 +1,6 @@
 import { Record } from 'immutable';
 import { Node } from './Node';
+import { BoundingBox } from './BoundingBox';
 
 export interface ISelectionBox {
 
@@ -22,6 +23,15 @@ const defaultSelectionBox = {
 
 export class SelectionBox extends Record<ISelectionBox>(defaultSelectionBox) {
 
+  public getBoundingBox(): BoundingBox {
+    return new BoundingBox({
+      x: this.getX(),
+      y: this.getY(),
+      width: this.getWidth(),
+      height: this.getHeight()
+    });
+  }
+
   public getX(): number {
     return Math.min(this.startX, this.cursorX);
   }
@@ -39,28 +49,7 @@ export class SelectionBox extends Record<ISelectionBox>(defaultSelectionBox) {
   }
 
   public includes(node: Node): boolean {
-    // Calculate the max and min positions of the node
-    const nodeMinX = node.getX();
-    const nodeMinY = node.getY();
-    const nodeMaxX = node.getX() + node.getWidth();
-    const nodeMaxY = node.getY() + node.getHeight();
-    const minX = this.getX();
-    const minY = this.getY();
-    const maxX = this.getX() + this.getWidth();
-    const maxY = this.getY() + this.getHeight();
-    // Check if any corners of the node are inside the selection box
-    if ((nodeMinX >= minX && nodeMinX <= maxX) || (nodeMaxX >= minX && nodeMaxX <= maxX)) {
-      if ((nodeMinY >= minY && nodeMinY <= maxY) || (nodeMaxY >= minY && nodeMaxY <= maxY)) {
-        return true;
-      }
-    }
-    // Check if any corners of the selection box are inside the node
-    if ((minX >= nodeMinX && minX <= nodeMaxX) || (maxX >= nodeMinX && maxX <= nodeMaxX)) {
-      if ((minY >= nodeMinY && minY <= nodeMaxY) || (maxY >= nodeMinY && maxY <= nodeMaxY)) {
-        return true;
-      }
-    }
-    return false;
+    return this.getBoundingBox().includes(node.getBoundingBox());
   }
 
 }

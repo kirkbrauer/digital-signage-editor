@@ -85,15 +85,16 @@ export default class Editor extends Component<EditorProps> {
     // A 5 px buffer is added to accommodate the resize handles
     const editorState = this.getEditorState();
     if (!editorState.selectedIDs.isEmpty()) {
+      const selectionBoundingBox = editorState.getSelectionBoundingBox();
       if (
         !(
           (
-            (cursorPosition.x >= editorState.getSelectionX() - 5) &&
-            (cursorPosition.x <= (editorState.getSelectionX() + editorState.getSelectionWidth() + 5))
+            (cursorPosition.x >= selectionBoundingBox.getMinX() - 5) &&
+            (cursorPosition.x <= (selectionBoundingBox.getMaxX() + 5))
           ) &&
           (
-            (cursorPosition.y >= editorState.getSelectionY() - 5) &&
-            (cursorPosition.y <= (editorState.getSelectionY() + editorState.getSelectionHeight() + 5))
+            (cursorPosition.y >= selectionBoundingBox.getMinY() - 5) &&
+            (cursorPosition.y <= (selectionBoundingBox.getMaxY() + 5))
           )
         )
       ) {
@@ -105,7 +106,7 @@ export default class Editor extends Component<EditorProps> {
   }
 
   private onMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (this.cursorOutsideSelection(e)) {
+    if (this.cursorOutsideSelection(e) && !this.props.shift) {
       // Get the cursor position from the event
       const cursorPosition = this.getCursorPosition(e);
       // Create an empty selection box

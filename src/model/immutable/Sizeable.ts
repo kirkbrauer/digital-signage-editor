@@ -1,9 +1,22 @@
 import { List } from 'immutable';
+import { BoundingBox } from './BoundingBox';
 
 /**
  * Defines a record whose size and position can be determined.
  */
 export abstract class Sizeable {
+
+  /**
+   * Returns the bounding box of the sizeable.
+   * The bounding box is the maximum size of the sizeable after rotation or transformation.
+   */
+  public abstract getBoundingBox(): BoundingBox;
+
+  /**
+   * Returns the size of the sizeable.
+   * The size of the sizeable is the actual size of the node.
+   */
+  public abstract getSize(): BoundingBox;
 
   /**
    * Returns the x position of the sizeable.
@@ -50,15 +63,30 @@ export abstract class Sizeable {
   public abstract setHeight(height: number): this;
 
   /**
+   * Calculates the bounding box of a sizeable.
+   * @param sizeables The sizeables to base the bounding box calculation.
+   */
+  public static calculateBoundingBox(sizeables: List<Sizeable>): BoundingBox {
+    const x = Sizeable.calculateX(sizeables);
+    const y = Sizeable.calculateY(sizeables);
+    return new BoundingBox({
+      x,
+      y,
+      width: Sizeable.calculateWidth(sizeables, x),
+      height: Sizeable.calculateHeight(sizeables, y)
+    });
+  }
+
+  /**
    * Calculates the x position of a node containing sizeables.
    * @param sizeables The sizeables to base the position calculation.
    */
   public static calculateX(sizeables: List<Sizeable>): number {
     // Get the min x values
-    let minX = sizeables.get(0)!.getX();
+    let minX = sizeables.get(0)!.getBoundingBox().x;
     for (const sizeable of sizeables) {
-      if (sizeable.getX() < minX) {
-        minX = sizeable.getX();
+      if (sizeable.getBoundingBox().x < minX) {
+        minX = sizeable.getBoundingBox().x;
       }
     }
     return minX;
@@ -70,10 +98,10 @@ export abstract class Sizeable {
    */
   public static calculateY(sizeables: List<Sizeable>): number {
     // Get the min y values
-    let minY = sizeables.get(0)!.getY();
+    let minY = sizeables.get(0)!.getBoundingBox().y;
     for (const sizeable of sizeables) {
-      if (sizeable.getY() < minY) {
-        minY = sizeable.getY();
+      if (sizeable.getBoundingBox().y < minY) {
+        minY = sizeable.getBoundingBox().y;
       }
     }
     return minY;
@@ -86,10 +114,10 @@ export abstract class Sizeable {
    */
   public static calculateWidth<T extends Sizeable>(sizeables: List<T>, parentX: number): number {
     // Find the maximum x positions of the sizeables
-    let maxX = sizeables.get(0)!.getX() + sizeables.get(0)!.getWidth();
+    let maxX = sizeables.get(0)!.getBoundingBox().getMaxX();
     for (const sizeable of sizeables) {
-      if (sizeable.getX() + sizeable.getWidth() > maxX) {
-        maxX = sizeable.getX() + sizeable.getWidth();
+      if (sizeable.getBoundingBox().getMaxX() > maxX) {
+        maxX = sizeable.getBoundingBox().getMaxX();
       }
     }
     // Return the max x minus the min x
@@ -103,10 +131,10 @@ export abstract class Sizeable {
    */
   public static calculateHeight<T extends Sizeable>(sizeables: List<T>, parentY: number): number {
     // Find the maximum y positions of the sizeables
-    let maxY = sizeables.get(0)!.getY() + sizeables.get(0)!.getHeight();
+    let maxY = sizeables.get(0)!.getBoundingBox().getMaxY();
     for (const sizeable of sizeables) {
-      if (sizeable.getY() + sizeable.getHeight() > maxY) {
-        maxY = sizeable.getY() + sizeable.getHeight();
+      if (sizeable.getBoundingBox().getMaxY() > maxY) {
+        maxY = sizeable.getBoundingBox().getMaxY();
       }
     }
     // Return the max x minus the min x

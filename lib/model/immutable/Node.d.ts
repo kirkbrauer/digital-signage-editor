@@ -5,6 +5,7 @@ import { VectorPath } from './VectorPath';
 import { Fill } from './Fill';
 import { EditorState } from 'draft-js';
 import { CSSProperties } from 'react';
+import { BoundingBox } from './BoundingBox';
 /**
  * Defines node types.
  */
@@ -107,10 +108,17 @@ export interface INode {
      * An array of corner radii for rectangles.
      */
     cornerRadii: List<number> | null;
+    /**
+     * The rotation of the node in degrees.
+     * 0-359 degrees.
+     */
+    rotation: number;
 }
 declare const Node_base: Record.Factory<INode>;
 export declare class Node extends Node_base implements Sizeable {
     constructor(props?: Partial<INode>);
+    getBoundingBox(): BoundingBox;
+    getSize(): BoundingBox;
     getX(): number;
     getY(): number;
     getWidth(): number;

@@ -2,6 +2,7 @@ import { Record, List } from 'immutable';
 import { Document } from './Document';
 import { Node } from './Node';
 import { SelectionBox } from './SelectionBox';
+import { BoundingBox } from './BoundingBox';
 export interface IEditorState {
     /**
      * Current document.
@@ -31,6 +32,10 @@ export declare class EditorState extends EditorState_base {
      * @param document The document.
      */
     static of(document: Document): EditorState;
+    /**
+     * Returns the bounding box of a selection.
+     */
+    getSelectionBoundingBox(): BoundingBox;
     /**
      * Returns the x position of the current selection.
      */

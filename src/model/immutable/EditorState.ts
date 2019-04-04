@@ -4,6 +4,7 @@ import { Node } from './Node';
 import { Sizeable } from './Sizeable';
 import uuid from 'uuid';
 import { SelectionBox } from './SelectionBox';
+import { BoundingBox } from './BoundingBox';
 
 export interface IEditorState {
 
@@ -50,6 +51,18 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    */
   public static of(document: Document): EditorState {
     return new EditorState({ document });
+  }
+
+  /**
+   * Returns the bounding box of a selection.
+   */
+  public getSelectionBoundingBox(): BoundingBox {
+    return new BoundingBox({
+      x: this.getSelectionX(),
+      y: this.getSelectionY(),
+      width: this.getSelectionWidth(),
+      height: this.getSelectionHeight()
+    });
   }
 
   /**
