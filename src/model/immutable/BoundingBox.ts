@@ -1,5 +1,6 @@
 import { Record } from 'immutable';
 import { Position } from './Position';
+import { Size } from './Size';
 
 /**
  * A box that bounds the maximum size of a sizeable after transformations.
@@ -66,6 +67,26 @@ export class BoundingBox extends Record<IBoundingBox>(defaultBoundingBox) {
   }
 
   /**
+   * Returns the position of the bounding box.
+   */
+  public getPosition(): Position {
+    return {
+      x: this.x,
+      y: this.y
+    };
+  }
+
+  /**
+   * Returns the size of the bounding box.
+   */
+  public getSize(): Size {
+    return {
+      width: this.width,
+      height: this.height
+    };
+  }
+
+  /**
    * Returns true if either of the bounding boxes instersect.
    * @param boundingBox The bounding box to check.
    */
@@ -78,7 +99,7 @@ export class BoundingBox extends Record<IBoundingBox>(defaultBoundingBox) {
     const minX = this.getMinX();
     const minY = this.getMinY();
     const maxX = this.getMaxX();
-    const maxY = this.getMaxX();
+    const maxY = this.getMaxY();
     // Check if any corners of the other box are inside the bounding box
     if ((nodeMinX >= minX && nodeMinX <= maxX) || (nodeMaxX >= minX && nodeMaxX <= maxX)) {
       if ((nodeMinY >= minY && nodeMinY <= maxY) || (nodeMaxY >= minY && nodeMaxY <= maxY)) {

@@ -1,5 +1,6 @@
 import { Record } from 'immutable';
 import { Position } from './Position';
+import { Size } from './Size';
 /**
  * A box that bounds the maximum size of a sizeable after transformations.
  */
@@ -39,6 +40,14 @@ export declare class BoundingBox extends BoundingBox_base {
      * Returns the maximum y value of the sizeable.
      */
     getMaxY(): number;
+    /**
+     * Returns the position of the bounding box.
+     */
+    getPosition(): Position;
+    /**
+     * Returns the size of the bounding box.
+     */
+    getSize(): Size;
     /**
      * Returns true if either of the bounding boxes instersect.
      * @param boundingBox The bounding box to check.

@@ -15,8 +15,6 @@ export default class Editor extends Component<EditorProps> {
     private onSelectionChange;
     private onNodeChange;
     private onSelect;
-    private onStartEditing;
-    private onStopEditing;
     private onDeselect;
     private getCursorPosition;
     private cursorOutsideSelection;

@@ -10,10 +10,7 @@ export interface NodeProps {
   groupX?: number;
   groupY?: number;
   selected?: boolean;
-  editing?: boolean;
   readOnly?: boolean;
-  onStartEditing?: () => void;
-  onStopEditing?: () => void;
   onSelect?: () => void;
   onDeselect?: () => void;
   onChange?: (node: ImmutableNode) => void;

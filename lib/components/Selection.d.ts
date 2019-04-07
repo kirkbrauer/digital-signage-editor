@@ -1,12 +1,19 @@
 import { Component } from 'react';
 import { List } from 'immutable';
-import { Node } from '../model/immutable';
+import { Node, Position, Size } from '../model/immutable';
 export interface SelectionProps {
     nodes: List<Node>;
     onChange: (nodes: List<Node>) => void;
 }
-export default class Selection extends Component<SelectionProps> {
+interface SelectionState {
+    position: Position;
+    size: Size;
+}
+export default class Selection extends Component<SelectionProps, SelectionState> {
+    constructor(props: SelectionProps);
+    componentWillReceiveProps(props: SelectionProps): void;
     private onDrag;
     private onResize;
     render(): JSX.Element;
 }
+export {};

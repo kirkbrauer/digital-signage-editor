@@ -7,6 +7,8 @@ import { EditorState } from 'draft-js';
 import uuid from 'uuid/v4';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Position } from './Position';
 
 /**
  * Defines node types.
@@ -181,13 +183,27 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     });
   }
 
-  public getSize() {
+  public getTransformedBoundingBox() {
     return new BoundingBox({
       x: this.getX(),
       y: this.getY(),
       width: this.getWidth(),
       height: this.getHeight()
     });
+  }
+
+  public getSize(): Size {
+    return {
+      width: this.getWidth(),
+      height: this.getHeight()
+    };
+  }
+
+  public getPosition(): Position {
+    return {
+      x: this.getX(),
+      y: this.getY()
+    };
   }
 
   public getX(): number {
@@ -244,6 +260,14 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
       return Sizeable.calculateHeight(this.paths!, this.getY());
     }
     return 0;
+  }
+
+  public setPosition(position: Position): this {
+    return this.setX(position.x).setY(position.y);
+  }
+
+  public setSize(size: Size): this {
+    return this.setWidth(size.width).setHeight(size.height);
   }
 
   public setX(x: number): this {
@@ -339,13 +363,14 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
 
   /**
    * Returns the node as CSS properties.
+   * @param fillContainer Should the node fill its parent container div.
    */
-  public toCSS(): CSSProperties {
+  public toCSS(fillContainer?: boolean): CSSProperties {
     const fillStyle = this.fill ? this.fill.toFillCSS() : {};
     const strokeStyle = this.stroke ? this.stroke.toStrokeCSS(this.strokeWeight, this.strokeAlign) : {};
     return {
-      height: this.getHeight(),
-      width: this.getWidth(),
+      height: fillContainer ? '100%' : this.getHeight(),
+      width: fillContainer ? '100%' : this.getWidth(),
       ...this.getBorderRadiusCSS(),
       ...fillStyle,
       ...strokeStyle

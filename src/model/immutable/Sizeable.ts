@@ -1,5 +1,7 @@
 import { List } from 'immutable';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Position } from './Position';
 
 /**
  * Defines a record whose size and position can be determined.
@@ -13,10 +15,19 @@ export abstract class Sizeable {
   public abstract getBoundingBox(): BoundingBox;
 
   /**
-   * Returns the size of the sizeable.
-   * The size of the sizeable is the actual size of the node.
+   * Returns the bounding box of the sizeable after transformations.
    */
-  public abstract getSize(): BoundingBox;
+  public abstract getTransformedBoundingBox(): BoundingBox;
+
+  /**
+   * Returns the size of the node.
+   */
+  public abstract getSize(): Size;
+
+  /**
+   * Returns the position of the node.
+   */
+  public abstract getPosition(): Position;
 
   /**
    * Returns the x position of the sizeable.
@@ -37,6 +48,18 @@ export abstract class Sizeable {
    * Returns the height of the sizeable.
    */
   public abstract getHeight(): number;
+
+  /**
+   * Sets the position of the sizeable.
+   * @param position The new position of the sizeable.
+   */
+  public abstract setPosition(position: Position): this;
+
+  /**
+   * Sets the size of the sizeable.
+   * @param size The new size of the sizeable.
+   */
+  public abstract setSize(size: Size): this;
 
   /**
    * Sets the x position of the sizeable.

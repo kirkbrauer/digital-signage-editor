@@ -19,11 +19,6 @@ export interface IEditorState {
   selectedIDs: List<string>;
 
   /**
-   * The ID of the node that is being edited.
-   */
-  editing: string | null;
-
-  /**
    * The current clipboard contents.
    */
   clipboard: List<Node>;
@@ -38,7 +33,6 @@ export interface IEditorState {
 const defaultEditorState: IEditorState = {
   document: new Document(),
   selectedIDs: List(),
-  editing: null,
   clipboard: List(),
   selectionBox: null
 };
@@ -91,16 +85,6 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    */
   public getSelectionHeight(): number {
     return Sizeable.calculateHeight(this.getSelectedNodes(), this.getSelectionY());
-  }
-
-  /**
-   * Returns the node that is currently being edited.
-   */
-  public getEditNode(): Node | null {
-    if (this.editing) {
-      return this.document.getNodeByID(this.editing);
-    }
-    return null;
   }
 
   /**

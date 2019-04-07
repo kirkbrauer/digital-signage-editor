@@ -6,6 +6,8 @@ import { Fill } from './Fill';
 import { EditorState } from 'draft-js';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Position } from './Position';
 /**
  * Defines node types.
  */
@@ -118,11 +120,15 @@ declare const Node_base: Record.Factory<INode>;
 export declare class Node extends Node_base implements Sizeable {
     constructor(props?: Partial<INode>);
     getBoundingBox(): BoundingBox;
-    getSize(): BoundingBox;
+    getTransformedBoundingBox(): BoundingBox;
+    getSize(): Size;
+    getPosition(): Position;
     getX(): number;
     getY(): number;
     getWidth(): number;
     getHeight(): number;
+    setPosition(position: Position): this;
+    setSize(size: Size): this;
     setX(x: number): this;
     setY(y: number): this;
     setWidth(width: number): this;
@@ -133,7 +139,8 @@ export declare class Node extends Node_base implements Sizeable {
     private getBorderRadiusCSS;
     /**
      * Returns the node as CSS properties.
+     * @param fillContainer Should the node fill its parent container div.
      */
-    toCSS(): CSSProperties;
+    toCSS(fillContainer?: boolean): CSSProperties;
 }
 export {};

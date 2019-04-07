@@ -3,6 +3,8 @@ import { Sizeable } from './Sizeable';
 import { Record, List } from 'immutable';
 import uuid from 'uuid/v4';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Position } from './Position';
 
 /**
  * A vector path.
@@ -60,13 +62,27 @@ export class VectorPath extends Record<VectorPathProps>(defaultVectorPath) imple
     });
   }
 
-  public getSize() {
+  public getTransformedBoundingBox() {
     return new BoundingBox({
       x: this.getX(),
       y: this.getY(),
       width: this.getWidth(),
       height: this.getHeight()
     });
+  }
+
+  public getSize(): Size {
+    return {
+      width: this.getWidth(),
+      height: this.getHeight()
+    };
+  }
+
+  public getPosition(): Position {
+    return {
+      x: this.getX(),
+      y: this.getY()
+    };
   }
 
   public getX(): number {
@@ -121,6 +137,14 @@ export class VectorPath extends Record<VectorPathProps>(defaultVectorPath) imple
     }
     // Return the max y pos minus the min y pos
     return maxY - minY;
+  }
+
+  public setPosition(position: Position): this {
+    return this.setX(position.x).setY(position.y);
+  }
+
+  public setSize(size: Size): this {
+    return this.setWidth(size.width).setHeight(size.height);
   }
 
   public setX(x: number): this {

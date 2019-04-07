@@ -5,8 +5,7 @@ export default class Rectangle extends NodeComponent {
 
   public renderStaticContent() {
     return (
-      <div 
-      style={this.props.node.toCSS()}/>
+      <div style={this.props.node.toCSS(true)}/>
     );
   }
 

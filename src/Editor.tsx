@@ -48,24 +48,14 @@ export default class Editor extends Component<EditorProps> {
     // Clear the selection box
     // Allow multiple selection when shift is pressed
     const newState = this.getEditorState().select(id, Boolean(this.props.shift));
-    // Stop editing the node when another node is selected
-    this.setEditorState(newState.set('editing', null).set('selectionBox', null));
-  }
-
-  private onStartEditing(id: string) {
-    const newState = this.getEditorState().set('editing', id);
-    this.setEditorState(newState);
-  }
-
-  private onStopEditing() {
-    const newState = this.getEditorState().set('editing', null);
-    this.setEditorState(newState);
+    // Clear the previous selection box
+    this.setEditorState(newState.set('selectionBox', null));
   }
 
   private onDeselect() {
     // Allow multiple selection when shift is pressed
     if (!this.props.shift) {
-      const newState = this.getEditorState().deselectAll().set('editing', null);
+      const newState = this.getEditorState().deselectAll();
       this.setEditorState(newState);
     }
   }
@@ -118,9 +108,7 @@ export default class Editor extends Component<EditorProps> {
             cursorX: cursorPosition.x,
             cursorY: cursorPosition.y
           })
-        )
-          .deselectAll() // Deselect all nodes before allowing selection
-          .set('editing', null) // Stop editing the currently edited node
+        ).deselectAll() // Deselect all nodes before allowing selection
       );
     }
   }
@@ -165,33 +153,18 @@ export default class Editor extends Component<EditorProps> {
         onMouseMove={e => this.onMouseMove(e)}
         onMouseUp={e => this.onMouseUp(e)}
       >
-        {this.getEditorState().document.nodes.reverse().filterNot((node) => {
-          return this.getEditorState().editing === node.id;
-        }).map((node) => {
-          return (
-            <Node
-              key={node.id}
-              node={node}
-              onSelect={() => this.onSelect(node.id)}
-              onStartEditing={() => this.onStartEditing(node.id)}
-              onStopEditing={() => this.onStopEditing()}
-              onDeselect={() => this.onDeselect()}
-              selected={this.getEditorState().selectedIDs.includes(node.id)}
-              editing={false}
-              onChange={node => this.onNodeChange(node)}
-              readOnly={this.props.readOnly || (this.getEditorState().selectedIDs.includes(node.id) && this.getEditorState().selectedIDs.count() > 1)}
-            />
-          );
-        })}
-        {this.getEditorState().getEditNode() ? (
+        {this.getEditorState().document.nodes.reverse().map(node => (
           <Node
-            key={this.getEditorState().getEditNode()!.id}
-            node={this.getEditorState().getEditNode()!}
+            key={node.id}
+            node={node}
+            onSelect={() => this.onSelect(node.id)}
             onDeselect={() => this.onDeselect()}
-            onChange={(node: ImmutableNode) => this.onNodeChange(node)}
-            editing={true}
-            selected={true}
-          />) : null}
+            selected={this.getEditorState().selectedIDs.includes(node.id)}
+            onChange={node => this.onNodeChange(node)}
+            readOnly={this.props.readOnly}
+            inGroup={this.getEditorState().selectedIDs.includes(node.id) && this.getEditorState().selectedIDs.count() > 1}
+          />
+        ))}
         {this.getEditorState().selectedIDs.count() > 1 ? (
           <Selection
             nodes={this.getEditorState().getSelectedNodes()}

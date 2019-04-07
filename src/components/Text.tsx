@@ -6,22 +6,15 @@ export default class Text extends NodeComponent {
 
   private editorRef = createRef<Editor>();
 
-  componentDidMount() {
-    // Focus the editor if the user enters edit mode
-    if (this.props.editing) {
-      this.editorRef.current!.focus();
-    }
-  }
-
   public renderEditableContent() {
-    return this.renderContent(true);
+    return this.renderContent();
   }
 
   public renderStaticContent() {
-    return this.renderContent(false);
+    return this.renderContent();
   }
 
-  private renderContent(editing: boolean) {
+  private renderContent() {
     return (
       <>
         <div style={{
@@ -32,27 +25,16 @@ export default class Text extends NodeComponent {
           zIndex: 10,
           minWidth: 'calc(100% - 16px)',
           cursor: 'text'
-        }}>
+        }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+        >
           <Editor
             ref={this.editorRef}
             editorState={this.props.node.editorState!}
             readOnly={this.props.readOnly}
             onFocus={() => {
-              if (this.dragging) {
-                // Prevent selection while dragging
-                this.editorRef.current!.blur();
-              } else {
-                // Start editing if the user clicks without dragging
-                if (this.props.onStartEditing) {
-                  this.props.onStartEditing();
-                }
-              }
-            }}
-            onBlur={() => {
-              // Stop editing if the editor loses focus
-              if (this.props.onStopEditing && editing) {
-                this.props.onStopEditing();
-              }
+              // Select the node when the text editor is focused
+              this.props.onSelect && this.props.onSelect();
             }}
             onChange={(editorState) => {
               if (this.props.onChange) {
@@ -63,7 +45,7 @@ export default class Text extends NodeComponent {
           />
         </div>
         <div
-          style={this.props.node.toCSS()}
+          style={this.props.node.toCSS(true)}
         />
       </>
     );

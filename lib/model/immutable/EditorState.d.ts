@@ -13,10 +13,6 @@ export interface IEditorState {
      */
     selectedIDs: List<string>;
     /**
-     * The ID of the node that is being edited.
-     */
-    editing: string | null;
-    /**
      * The current clipboard contents.
      */
     clipboard: List<Node>;
@@ -52,10 +48,6 @@ export declare class EditorState extends EditorState_base {
      * Returns the height of the current selection.
      */
     getSelectionHeight(): number;
-    /**
-     * Returns the node that is currently being edited.
-     */
-    getEditNode(): Node | null;
     /**
      * Returns a list of currently selected nodes.
      */

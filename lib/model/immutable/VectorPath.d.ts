@@ -2,6 +2,8 @@ import { VectorPoint } from './VectorPoint';
 import { Sizeable } from './Sizeable';
 import { Record, List } from 'immutable';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Position } from './Position';
 /**
  * A vector path.
  */
@@ -32,11 +34,15 @@ declare const VectorPath_base: Record.Factory<VectorPathProps>;
 export declare class VectorPath extends VectorPath_base implements Sizeable {
     constructor(props?: Partial<VectorPathProps>);
     getBoundingBox(): BoundingBox;
-    getSize(): BoundingBox;
+    getTransformedBoundingBox(): BoundingBox;
+    getSize(): Size;
+    getPosition(): Position;
     getX(): number;
     getY(): number;
     getWidth(): number;
     getHeight(): number;
+    setPosition(position: Position): this;
+    setSize(size: Size): this;
     setX(x: number): this;
     setY(y: number): this;
     setWidth(width: number): this;
