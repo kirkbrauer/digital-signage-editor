@@ -5,6 +5,8 @@ import { Sizeable } from './Sizeable';
 import uuid from 'uuid';
 import { SelectionBox } from './SelectionBox';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Vector } from './Vector';
 
 export interface IEditorState {
 
@@ -51,40 +53,21 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    * Returns the bounding box of a selection.
    */
   public getSelectionBoundingBox(): BoundingBox {
-    return new BoundingBox({
-      x: this.getSelectionX(),
-      y: this.getSelectionY(),
-      width: this.getSelectionWidth(),
-      height: this.getSelectionHeight()
-    });
+    return Sizeable.calculateBoundingBox(this.getSelectedNodes());
   }
 
   /**
-   * Returns the x position of the current selection.
+   * Returns the position of the current selection.
    */
-  public getSelectionX(): number {
-    return Sizeable.calculateX(this.getSelectedNodes());
+  public getSelectionPosition(): Vector {
+    return Sizeable.calculatePosition(this.getSelectedNodes());
   }
 
   /**
-   * Returns the y position of the current selection.
+   * Returns the size of the current selection.
    */
-  public getSelectionY(): number {
-    return Sizeable.calculateY(this.getSelectedNodes());
-  }
-
-  /**
-   * Returns the width of the current selection.
-   */
-  public getSelectionWidth(): number {
-    return Sizeable.calculateWidth(this.getSelectedNodes(), this.getSelectionX());
-  }
-
-  /**
-   * Returns the height of the current selection.
-   */
-  public getSelectionHeight(): number {
-    return Sizeable.calculateHeight(this.getSelectedNodes(), this.getSelectionY());
+  public getSelectionSize(): Size {
+    return Sizeable.calculateSize(this.getSelectedNodes());
   }
 
   /**

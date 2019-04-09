@@ -1,51 +1,43 @@
 import { Record } from 'immutable';
 import { Node } from './Node';
 import { BoundingBox } from './BoundingBox';
+import { Vector } from './Vector';
+import { Size } from './Size';
 
 export interface ISelectionBox {
 
-  startX: number;
+  startPos: Vector;
 
-  startY: number;
-
-  cursorX: number;
-
-  cursorY: number;
+  cursorPos: Vector;
 
 }
 
-const defaultSelectionBox = {
-  startX: 0,
-  startY: 0,
-  cursorX: 0,
-  cursorY: 0
+const defaultSelectionBox: ISelectionBox = {
+  startPos: new Vector(),
+  cursorPos: new Vector()
 };
 
 export class SelectionBox extends Record<ISelectionBox>(defaultSelectionBox) {
 
   public getBoundingBox(): BoundingBox {
     return new BoundingBox({
-      x: this.getX(),
-      y: this.getY(),
-      width: this.getWidth(),
-      height: this.getHeight()
+      position: this.getPosition(),
+      size: this.getSize()
     });
   }
 
-  public getX(): number {
-    return Math.min(this.startX, this.cursorX);
+  public getPosition(): Vector {
+    return new Vector({
+      x: Math.min(this.startPos.x, this.cursorPos.x),
+      y: Math.min(this.startPos.y, this.cursorPos.y)
+    });
   }
 
-  public getY(): number {
-    return Math.min(this.startY, this.cursorY);
-  }
-
-  public getWidth(): number {
-    return Math.abs(this.cursorX - this.startX);
-  }
-
-  public getHeight(): number {
-    return Math.abs(this.cursorY - this.startY);
+  public getSize(): Size {
+    return new Size({
+      width: Math.abs(this.cursorPos.x - this.startPos.x),
+      height: Math.abs(this.cursorPos.y - this.startPos.y)
+    });
   }
 
   public includes(node: Node): boolean {

@@ -1,10 +1,9 @@
 import { Component } from 'react';
-import { Node as ImmutableNode } from '../model/immutable';
+import { Node as ImmutableNode, Vector } from '../model/immutable';
 export interface NodeProps {
     node: ImmutableNode;
     inGroup?: boolean;
-    groupX?: number;
-    groupY?: number;
+    groupPos?: Vector;
     selected?: boolean;
     readOnly?: boolean;
     onSelect?: () => void;

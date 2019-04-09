@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 // import Resizable, { ResizableDirection, NumberSize } from 're-resizable';
 // import Draggable, { DraggableData } from 'react-draggable';
 import { List } from 'immutable';
-import { Node, Sizeable, Position, Size } from '../model/immutable';
+import { Node, Sizeable, Vector, Size } from '../model/immutable';
 import Transformer from './Transformer';
 
 export interface SelectionProps {
@@ -11,7 +11,7 @@ export interface SelectionProps {
 }
 
 interface SelectionState {
-  position: Position;
+  position: Vector;
   size: Size;
 }
 
@@ -19,14 +19,8 @@ export default class Selection extends Component<SelectionProps, SelectionState>
 
   constructor(props: SelectionProps) {
     super(props);
-    const position: Position = {
-      x: Sizeable.calculateX(props.nodes),
-      y: Sizeable.calculateY(props.nodes)
-    };
-    const size: Size = {
-      width: Sizeable.calculateWidth(props.nodes, position.x),
-      height: Sizeable.calculateHeight(props.nodes, position.y)
-    };
+    const position = Sizeable.calculatePosition(props.nodes);
+    const size = Sizeable.calculateSize(props.nodes);
     this.state = {
       position,
       size
@@ -34,62 +28,37 @@ export default class Selection extends Component<SelectionProps, SelectionState>
   }
 
   componentWillReceiveProps(props: SelectionProps) {
-    const position: Position = {
-      x: Sizeable.calculateX(props.nodes),
-      y: Sizeable.calculateY(props.nodes)
-    };
-    const size: Size = {
-      width: Sizeable.calculateWidth(props.nodes, position.x),
-      height: Sizeable.calculateHeight(props.nodes, position.y)
-    };
+    const position = Sizeable.calculatePosition(props.nodes);
+    const size = Sizeable.calculateSize(props.nodes);
     this.setState({ position, size });
   }
 
-  private onDrag(position: Position) {
+  private onDrag(position: Vector) {
     this.setState({ position });
     if (this.props.onChange) {
-      const oldX = Sizeable.calculateX(this.props.nodes);
-      const oldY = Sizeable.calculateY(this.props.nodes);
       this.props.onChange(
-        Sizeable.setSizeableXPositions(
-          Sizeable.setSizeableYPositions(
-            this.props.nodes,
-            oldY,
-            position.y
-          ),
-          oldX,
-          position.x
+        Sizeable.setSizeablePositions(
+          this.props.nodes,
+          position
         )
       );
     }
   }
 
-  private onResize(size: Size, position: Position) {
+  private onResize(size: Size, position: Vector) {
     this.setState({ size, position });
     if (this.props.onChange) {
-      const oldX = Sizeable.calculateX(this.props.nodes);
+      /*const oldX = Sizeable.calculateX(this.props.nodes);
       const oldY = Sizeable.calculateY(this.props.nodes);
       const oldWidth = Sizeable.calculateWidth(this.props.nodes, oldX);
-      const oldHeight = Sizeable.calculateHeight(this.props.nodes, oldY);
+      const oldHeight = Sizeable.calculateHeight(this.props.nodes, oldY);*/
       this.props.onChange(
-        Sizeable.setSizeableWidths(
-          Sizeable.setSizeableHeights(
-            Sizeable.setSizeableXPositions(
-              Sizeable.setSizeableYPositions(
-                this.props.nodes,
-                oldY,
-                position.y
-              ),
-              oldX,
-              position.x
-            ),
-            oldY,
-            oldHeight,
-            size.height
+        Sizeable.setSizeableSizes(
+          Sizeable.setSizeablePositions(
+            this.props.nodes,
+            position
           ),
-          oldX,
-          oldWidth,
-          size.width
+          size
         )
       );
     }
@@ -101,6 +70,7 @@ export default class Selection extends Component<SelectionProps, SelectionState>
         position={this.state.position}
         size={this.state.size}
         rotation={0}
+        disableRotation
         onDrag={(e, pos) => this.onDrag(pos)}
         onResize={(e, size, pos) => this.onResize(size, pos)}
       />

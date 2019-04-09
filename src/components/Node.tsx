@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Node as ImmutableNode, NodeType } from '../model/immutable';
+import { Node as ImmutableNode, Vector } from '../model/immutable';
+import { NodeType } from '../model/raw';
 import Rectangle from './Rectangle';
 import Ellipse from './Ellipse';
 import Text from './Text';
@@ -7,8 +8,7 @@ import Text from './Text';
 export interface NodeProps {
   node: ImmutableNode;
   inGroup?: boolean;
-  groupX?: number;
-  groupY?: number;
+  groupPos?: Vector;
   selected?: boolean;
   readOnly?: boolean;
   onSelect?: () => void;

@@ -1,26 +1,18 @@
 import { Record } from 'immutable';
-import { Position } from './Position';
+import { Vector } from './Vector';
 import { Size } from './Size';
 /**
  * A box that bounds the maximum size of a sizeable after transformations.
  */
-export interface IBoundingBox extends Position {
+export interface IBoundingBox {
     /**
-     * The x position of the bounding box.
+     * The position of the bounding box.
      */
-    x: number;
+    position: Vector;
     /**
-     * The y position of the bounding box.
+     * The size of the bounding box.
      */
-    y: number;
-    /**
-     * The width of the bounding box.
-     */
-    width: number;
-    /**
-     * The height of the bounding box.
-     */
-    height: number;
+    size: Size;
 }
 declare const BoundingBox_base: Record.Factory<IBoundingBox>;
 export declare class BoundingBox extends BoundingBox_base {
@@ -40,14 +32,6 @@ export declare class BoundingBox extends BoundingBox_base {
      * Returns the maximum y value of the sizeable.
      */
     getMaxY(): number;
-    /**
-     * Returns the position of the bounding box.
-     */
-    getPosition(): Position;
-    /**
-     * Returns the size of the bounding box.
-     */
-    getSize(): Size;
     /**
      * Returns true if either of the bounding boxes instersect.
      * @param boundingBox The bounding box to check.

@@ -6,26 +6,9 @@ import { Fill } from './Fill';
 import { EditorState } from 'draft-js';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
+import { NodeType, StrokeAlign } from '../raw';
+import { Vector } from './Vector';
 import { Size } from './Size';
-import { Position } from './Position';
-/**
- * Defines node types.
- */
-export declare enum NodeType {
-    GROUP = "GROUP",
-    VECTOR = "VECTOR",
-    ELLIPSE = "ELLIPSE",
-    RECT = "RECT",
-    TEXT = "TEXT"
-}
-/**
- * Defines stroke alignments.
- */
-export declare enum StrokeAlign {
-    INSIDE = "INSIDE",
-    OUTSIDE = "OUTSIDE",
-    CENTER = "CENTER"
-}
 /**
  * An editor node.
  */
@@ -43,21 +26,13 @@ export interface INode {
      */
     name: string | null;
     /**
-     * X Position of the node.
+     * The position of the node.
      */
-    x: number | null;
+    position: Vector | null;
     /**
-     * Y Position of the node.
+     * The size of the node.
      */
-    y: number | null;
-    /**
-     * Width of the node.
-     */
-    width: number | null;
-    /**
-     * Height of the node.
-     */
-    height: number | null;
+    size: Size | null;
     /**
      * Whether the node is visible.
      */
@@ -121,18 +96,10 @@ export declare class Node extends Node_base implements Sizeable {
     constructor(props?: Partial<INode>);
     getBoundingBox(): BoundingBox;
     getTransformedBoundingBox(): BoundingBox;
+    getPosition(): Vector;
     getSize(): Size;
-    getPosition(): Position;
-    getX(): number;
-    getY(): number;
-    getWidth(): number;
-    getHeight(): number;
-    setPosition(position: Position): this;
+    setPosition(position: Vector): this;
     setSize(size: Size): this;
-    setX(x: number): this;
-    setY(y: number): this;
-    setWidth(width: number): this;
-    setHeight(height: number): this;
     /**
      * Returns the border radius CSS for a node.
      */

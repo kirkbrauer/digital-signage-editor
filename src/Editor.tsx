@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { EditorState, Node as ImmutableNode, SelectionBox as ImmutableSelectionBox } from './model/immutable';
+import { EditorState, Node as ImmutableNode, SelectionBox as ImmutableSelectionBox, Vector } from './model/immutable';
 import Node from './components/Node';
 import Selection from './components/Selection';
 import { List } from 'immutable';
@@ -60,13 +60,13 @@ export default class Editor extends Component<EditorProps> {
     }
   }
 
-  private getCursorPosition(e: React.MouseEvent<HTMLDivElement, MouseEvent>): { x: number; y: number; } {
+  private getCursorPosition(e: React.MouseEvent<HTMLDivElement, MouseEvent>): Vector {
     // Get the x and y position of the click relative to the editor element
     const rect = e.currentTarget.getBoundingClientRect();
-    return {
+    return new Vector({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
-    };
+    });
   }
 
   private cursorOutsideSelection(e: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
@@ -103,10 +103,8 @@ export default class Editor extends Component<EditorProps> {
       this.setEditorState(
         this.getEditorState().set('selectionBox',
           new ImmutableSelectionBox({
-            startX: cursorPosition.x,
-            startY: cursorPosition.y,
-            cursorX: cursorPosition.x,
-            cursorY: cursorPosition.y
+            startPos: cursorPosition,
+            cursorPos: cursorPosition
           })
         ).deselectAll() // Deselect all nodes before allowing selection
       );
@@ -119,9 +117,7 @@ export default class Editor extends Component<EditorProps> {
       // Get the cursor position from the event
       const cursorPosition = this.getCursorPosition(e);
       // Set the cursor position of the selection box.
-      let newState = this.getEditorState()
-        .setIn(['selectionBox', 'cursorX'], cursorPosition.x)
-        .setIn(['selectionBox', 'cursorY'], cursorPosition.y);
+      let newState = this.getEditorState().setIn(['selectionBox', 'cursorPos'], cursorPosition);
       // Select nodes if they are inside the selection box
       for (const node of newState.document.nodes) {
         if (newState.selectionBox!.includes(node)) {

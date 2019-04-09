@@ -3,13 +3,13 @@ import { Sizeable } from './Sizeable';
 import { Record, List } from 'immutable';
 import uuid from 'uuid/v4';
 import { BoundingBox } from './BoundingBox';
+import { Vector } from './Vector';
 import { Size } from './Size';
-import { Position } from './Position';
 
 /**
  * A vector path.
  */
-export interface VectorPathProps {
+export interface IVectorPath {
 
   /**
    * The ID of the vector path.
@@ -17,14 +17,9 @@ export interface VectorPathProps {
   id: string;
 
   /**
-   * The absolute x position of the path.
+   * The absolute position of the vector path.
    */
-  x: number;
-
-   /**
-   * The absolute x position of the path.
-   */
-  y: number;
+  position: Vector;
 
   /**
    * An array of points that make up the path.
@@ -39,158 +34,105 @@ export interface VectorPathProps {
 
 }
 
-const defaultVectorPath: VectorPathProps = {
+const defaultVectorPath: IVectorPath = {
   id: '',
-  x: 0,
-  y: 0,
+  position: new Vector(),
   points: List()
 };
 
-export class VectorPath extends Record<VectorPathProps>(defaultVectorPath) implements Sizeable {
+export class VectorPath extends Record<IVectorPath>(defaultVectorPath) implements Sizeable {
 
-  constructor(props?: Partial<VectorPathProps>) {
+  constructor(props?: Partial<IVectorPath>) {
     // Generate a unique UUID for a new vector path.
     super(Object.assign({}, props, { id: (props && props.id) || uuid() }));
   }
 
   public getBoundingBox() {
     return new BoundingBox({
-      x: this.getX(),
-      y: this.getY(),
-      width: this.getWidth(),
-      height: this.getHeight()
+      position: this.getPosition(),
+      size: this.getSize()
     });
   }
 
   public getTransformedBoundingBox() {
     return new BoundingBox({
-      x: this.getX(),
-      y: this.getY(),
-      width: this.getWidth(),
-      height: this.getHeight()
+      position: this.getPosition(),
+      size: this.getSize()
+    });
+  }
+
+  public getPosition(): Vector {
+    const pointZeroPos = this.points.get(0)!.position;
+    // Get the min x value
+    let minX = pointZeroPos.x;
+    let minY = pointZeroPos.y;
+    for (const point of this.points) {
+      if (point.position.x < minX) {
+        minX = point.position.x;
+      }
+      if (point.position.y < minY) {
+        minY = point.position.y;
+      }
+    }
+    return new Vector({
+      x: minX,
+      y: minY
     });
   }
 
   public getSize(): Size {
-    return {
-      width: this.getWidth(),
-      height: this.getHeight()
-    };
-  }
-
-  public getPosition(): Position {
-    return {
-      x: this.getX(),
-      y: this.getY()
-    };
-  }
-
-  public getX(): number {
-    // Get the min x value
-    let minX = this.points.get(0)!.x;
+    const minPos = this.getPosition();
+    const pointZeroPos = this.points.get(0)!.position;
+    let maxX = pointZeroPos.x;
+    let maxY = pointZeroPos.y;
+    // Get the max points
     for (const point of this.points) {
-      if (point.x < minX) {
-        minX = point.x;
+      if (point.position.x > maxX) {
+        maxX = point.position.x;
+      }
+      if (point.position.y > maxY) {
+        maxY = point.position.y;
       }
     }
-    return minX;
+    // Return the max minus the min
+    return new Size({
+      width: maxX - minPos.x,
+      height: maxY - minPos.y
+    });
   }
 
-  public getY(): number {
-    // Get the min y value
-    let minY = this.points.get(0)!.y;
-    for (const point of this.points) {
-      if (point.y < minY) {
-        minY = point.y;
-      }
-    }
-    return minY;
-  }
-
-  public getWidth(): number {
-    let maxX = this.points.get(0)!.x;
-    let minX = this.points.get(0)!.x;
-    // Get the max and min x values
-    for (const point of this.points) {
-      if (point.x > maxX) {
-        maxX = point.x;
-      }
-      if (point.x < minX) {
-        minX = point.x;
-      }
-    }
-    // Return the max x pos minus the min x pos
-    return maxX - minX;
-  }
-
-  public getHeight(): number {
-    let maxY = this.points.get(0)!.y;
-    let minY = this.points.get(0)!.y;
-    // Get the max and min y values
-    for (const point of this.points) {
-      if (point.y > maxY) {
-        maxY = point.x;
-      }
-      if (point.y < minY) {
-        minY = point.x;
-      }
-    }
-    // Return the max y pos minus the min y pos
-    return maxY - minY;
-  }
-
-  public setPosition(position: Position): this {
-    return this.setX(position.x).setY(position.y);
+  public setPosition(position: Vector): this {
+    const parentPosition = this.getPosition();
+    return this.set('points',
+      this.points.map((point) => {
+        // Calculate the offset between the point position and the path position
+        const offsetX = point.position.x - parentPosition.x;
+        const offsetY = point.position.y - parentPosition.y;
+        // Set the point x to the new position + the offset
+        return point.set('position', new Vector({
+          x: position.x + offsetX,
+          y: position.y + offsetY
+        }));
+      })
+    );
   }
 
   public setSize(size: Size): this {
-    return this.setWidth(size.width).setHeight(size.height);
-  }
-
-  public setX(x: number): this {
-    return this.set('points',
-      this.points.map((point) => {
-        // Calculate the offset between the point position and the path position
-        const offset = point.x - this.getX();
-        // Set the point x to the new position + the offset
-        return point.set('x', x + offset);
-      })
-    );
-  }
-
-  public setY(y: number): this {
-    return this.set('points',
-      this.points.map((point) => {
-        // Calculate the offset between the point position and the path position
-        const offset = point.y - this.getX();
-        // Set the point y to the new position + the offset
-        return point.set('y', y + offset);
-      })
-    );
-  }
-
-  public setWidth(width: number): this {
+    const parentPosition = this.getPosition();
+    const parentSize = this.getSize();
     return this.set('points',
       this.points.map((point) => {
         // Calculate the offset between the points's position and the paths's position
-        const offset = point.x - this.getX();
+        const offsetX = point.position.x - parentPosition.x;
+        const offsetY = point.position.y - parentPosition.y;
         // Calculate the ratio of the offset to the actual width of the path
-        const posRatio = offset / this.getWidth();
-        // Set the x position of the point
-        return point.set('x', this.getX() + (posRatio * width));
-      })
-    );
-  }
-
-  public setHeight(height: number): this {
-    return this.set('points',
-      this.points.map((point) => {
-        // Calculate the offset between the points's position and the paths's position
-        const offset = point.y - this.getY();
-        // Calculate the ratio of the offset to the actual width of the path
-        const posRatio = offset / this.getHeight();
-        // Set the y position of the point
-        return point.set('y', this.getY() + (posRatio * height));
+        const xPosRatio = offsetX / parentSize.width;
+        const yPosRatio = offsetY / parentSize.height;
+        // Set the position of the point
+        return point.set('position', new Vector({
+          x: parentPosition.x + (xPosRatio * size.width),
+          y: parentPosition.y + (yPosRatio * size.height),
+        }));
       })
     );
   }

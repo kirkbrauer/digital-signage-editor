@@ -1,39 +1,27 @@
 import { Record } from 'immutable';
-import { Position } from './Position';
+import { Vector } from './Vector';
 import { Size } from './Size';
 
 /**
  * A box that bounds the maximum size of a sizeable after transformations.
  */
-export interface IBoundingBox extends Position {
+export interface IBoundingBox {
 
   /**
-   * The x position of the bounding box.
+   * The position of the bounding box.
    */
-  x: number;
+  position: Vector;
 
   /**
-   * The y position of the bounding box.
+   * The size of the bounding box.
    */
-  y: number;
-
-  /**
-   * The width of the bounding box.
-   */
-  width: number;
-
-  /**
-   * The height of the bounding box.
-   */
-  height: number;
+  size: Size;
 
 }
 
 const defaultBoundingBox: IBoundingBox = {
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0
+  position: new Vector(),
+  size: new Size()
 };
 
 export class BoundingBox extends Record<IBoundingBox>(defaultBoundingBox) {
@@ -42,48 +30,28 @@ export class BoundingBox extends Record<IBoundingBox>(defaultBoundingBox) {
    * Returns the minimum x value of the sizeable.
    */
   public getMinX(): number {
-    return this.x;
+    return this.position.x;
   }
 
   /**
    * Returns the minimum y value of the sizeable.
    */
   public getMinY(): number {
-    return this.y;
+    return this.position.y;
   }
 
   /**
    * Returns the maximum x value of the sizeable.
    */
   public getMaxX(): number {
-    return this.x + this.width;
+    return this.position.x + this.size.width;
   }
 
   /**
    * Returns the maximum y value of the sizeable.
    */
   public getMaxY(): number {
-    return this.y + this.height;
-  }
-
-  /**
-   * Returns the position of the bounding box.
-   */
-  public getPosition(): Position {
-    return {
-      x: this.x,
-      y: this.y
-    };
-  }
-
-  /**
-   * Returns the size of the bounding box.
-   */
-  public getSize(): Size {
-    return {
-      width: this.width,
-      height: this.height
-    };
+    return this.position.y + this.size.height;
   }
 
   /**

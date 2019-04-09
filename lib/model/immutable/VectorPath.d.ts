@@ -2,24 +2,20 @@ import { VectorPoint } from './VectorPoint';
 import { Sizeable } from './Sizeable';
 import { Record, List } from 'immutable';
 import { BoundingBox } from './BoundingBox';
+import { Vector } from './Vector';
 import { Size } from './Size';
-import { Position } from './Position';
 /**
  * A vector path.
  */
-export interface VectorPathProps {
+export interface IVectorPath {
     /**
      * The ID of the vector path.
      */
     id: string;
     /**
-     * The absolute x position of the path.
+     * The absolute position of the vector path.
      */
-    x: number;
-    /**
-    * The absolute x position of the path.
-    */
-    y: number;
+    position: Vector;
     /**
      * An array of points that make up the path.
      */
@@ -30,22 +26,14 @@ export interface VectorPathProps {
      */
     open?: boolean;
 }
-declare const VectorPath_base: Record.Factory<VectorPathProps>;
+declare const VectorPath_base: Record.Factory<IVectorPath>;
 export declare class VectorPath extends VectorPath_base implements Sizeable {
-    constructor(props?: Partial<VectorPathProps>);
+    constructor(props?: Partial<IVectorPath>);
     getBoundingBox(): BoundingBox;
     getTransformedBoundingBox(): BoundingBox;
+    getPosition(): Vector;
     getSize(): Size;
-    getPosition(): Position;
-    getX(): number;
-    getY(): number;
-    getWidth(): number;
-    getHeight(): number;
-    setPosition(position: Position): this;
+    setPosition(position: Vector): this;
     setSize(size: Size): this;
-    setX(x: number): this;
-    setY(y: number): this;
-    setWidth(width: number): this;
-    setHeight(height: number): this;
 }
 export {};

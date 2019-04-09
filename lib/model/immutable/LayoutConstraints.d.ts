@@ -1,29 +1,9 @@
 import { Record } from 'immutable';
-/**
- * Defines constraint types.
- */
-export declare enum Constraint {
-    TOP = "TOP",
-    BOTTOM = "BOTTOM",
-    CENTER = "CENTER",
-    TOP_BOTTOM = "TOP_BOTTOM",
-    LEFT = "LEFT",
-    RIGHT = "RIGHT",
-    LEFT_RIGHT = "LEFT_RIGHT",
-    SCALE = "SCALE"
-}
+import { RawLayoutConstraints } from '../raw';
 /**
  * The layout constraints of a node.
  */
-export interface ILayoutConstraints {
-    /**
-     * Vertical constraint.
-     */
-    vertical?: Constraint;
-    /**
-     * Horizontal constraint.
-     */
-    horizontal?: Constraint;
+export interface ILayoutConstraints extends RawLayoutConstraints {
 }
 declare const LayoutConstraints_base: Record.Factory<ILayoutConstraints>;
 export declare class LayoutConstraints extends LayoutConstraints_base {

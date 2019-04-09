@@ -1,32 +1,9 @@
 import { Record, List } from 'immutable';
 import { Color } from './Color';
 import { CSSProperties } from 'react';
-import { StrokeAlign } from './Node';
+import { StrokeAlign } from '../raw';
 import { ColorStop } from './ColorStop';
-/**
- * Defines image scale modes.
- */
-export declare enum ImageScaleMode {
-    FILL = "FILL",
-    FIT = "FIT",
-    REPEAT = "REPEAR",
-    STRETCH = "STRETCH"
-}
-/**
- * Defines image repeat modes.
- */
-export declare enum ImageRepeatMode {
-    REPEAT = "REPEAT",
-    REPEAT_X = "REPEAT_X",
-    REPEAT_Y = "REPEAT_Y"
-}
-/**
- * Defines gradient types.
- */
-export declare enum GradientType {
-    LINEAR = "LINEAR",
-    RADIAL = "RADIAL"
-}
+import { ImageScaleMode, GradientType, ImageRepeatMode } from '../raw';
 /**
  * A fill for a shape or line.
  */

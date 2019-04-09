@@ -3,6 +3,8 @@ import { Document } from './Document';
 import { Node } from './Node';
 import { SelectionBox } from './SelectionBox';
 import { BoundingBox } from './BoundingBox';
+import { Size } from './Size';
+import { Vector } from './Vector';
 export interface IEditorState {
     /**
      * Current document.
@@ -33,21 +35,13 @@ export declare class EditorState extends EditorState_base {
      */
     getSelectionBoundingBox(): BoundingBox;
     /**
-     * Returns the x position of the current selection.
+     * Returns the position of the current selection.
      */
-    getSelectionX(): number;
+    getSelectionPosition(): Vector;
     /**
-     * Returns the y position of the current selection.
+     * Returns the size of the current selection.
      */
-    getSelectionY(): number;
-    /**
-     * Returns the width of the current selection.
-     */
-    getSelectionWidth(): number;
-    /**
-     * Returns the height of the current selection.
-     */
-    getSelectionHeight(): number;
+    getSelectionSize(): Size;
     /**
      * Returns a list of currently selected nodes.
      */

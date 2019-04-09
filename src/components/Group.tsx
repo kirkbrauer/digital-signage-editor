@@ -12,8 +12,7 @@ export default class Group extends NodeComponent {
             key={node.id}
             node={node}
             inGroup={true}
-            groupX={this.props.node.getX()}
-            groupY={this.props.node.getY()}
+            groupPos={this.props.node.getPosition()}
           />
         ))}
       </div>

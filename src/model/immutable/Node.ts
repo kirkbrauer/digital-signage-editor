@@ -7,28 +7,9 @@ import { EditorState } from 'draft-js';
 import uuid from 'uuid/v4';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
+import { NodeType, StrokeAlign } from '../raw';
+import { Vector } from './Vector';
 import { Size } from './Size';
-import { Position } from './Position';
-
-/**
- * Defines node types.
- */
-export enum NodeType {
-  GROUP = 'GROUP',
-  VECTOR = 'VECTOR',
-  ELLIPSE = 'ELLIPSE',
-  RECT = 'RECT',
-  TEXT = 'TEXT'
-}
-
-/**
- * Defines stroke alignments.
- */
-export enum StrokeAlign {
-  INSIDE = 'INSIDE',
-  OUTSIDE = 'OUTSIDE',
-  CENTER = 'CENTER'
-}
 
 /**
  * An editor node.
@@ -51,24 +32,14 @@ export interface INode {
   name: string | null;
 
   /**
-   * X Position of the node.
+   * The position of the node.
    */
-  x: number | null;
+  position: Vector | null;
 
   /**
-   * Y Position of the node.
+   * The size of the node.
    */
-  y: number | null;
-
-  /**
-   * Width of the node.
-   */
-  width: number | null;
-
-  /**
-   * Height of the node.
-   */
-  height: number | null;
+  size: Size | null;
 
   /**
    * Whether the node is visible.
@@ -147,10 +118,8 @@ const defaultNode: INode = {
   id: '',
   type: NodeType.RECT,
   name: null,
-  x: null,
-  y: null,
-  width: null,
-  height: null,
+  position: null,
+  size: null,
   visible: true,
   opacity: 1.0,
   constraints: null,
@@ -174,166 +143,67 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     super({ ...props, id: (props && props.id) || uuid() });
   }
 
-  public getBoundingBox() {
+  public getBoundingBox(): BoundingBox {
     return new BoundingBox({
-      x: this.getX(),
-      y: this.getY(),
-      width: this.getWidth(),
-      height: this.getHeight()
+      position: this.getPosition(),
+      size: this.getSize()
     });
   }
 
-  public getTransformedBoundingBox() {
-    return new BoundingBox({
-      x: this.getX(),
-      y: this.getY(),
-      width: this.getWidth(),
-      height: this.getHeight()
-    });
+  public getTransformedBoundingBox(): BoundingBox {
+    return this.getBoundingBox();
+  }
+
+  public getPosition(): Vector {
+    // Return the position if the node has the property
+    if (this.position !== null) {
+      return this.position;
+    }
+    if (this.type === NodeType.GROUP) {
+      return Sizeable.calculatePosition(this.nodes!);
+    }
+    if (this.type === NodeType.VECTOR) {
+      return Sizeable.calculatePosition(this.paths!);
+    }
+    return new Vector();
   }
 
   public getSize(): Size {
-    return {
-      width: this.getWidth(),
-      height: this.getHeight()
-    };
-  }
-
-  public getPosition(): Position {
-    return {
-      x: this.getX(),
-      y: this.getY()
-    };
-  }
-
-  public getX(): number {
-    // Return the x pos if the node has the property
-    if (this.x !== null) {
-      return this.x;
+    // Return the size if the node has the property
+    if (this.size !== null) {
+      return this.size;
     }
     if (this.type === NodeType.GROUP) {
-      return Sizeable.calculateX(this.nodes!);
+      return Sizeable.calculateSize(this.nodes!);
     }
     if (this.type === NodeType.VECTOR) {
-      return Sizeable.calculateX(this.paths!);
+      return Sizeable.calculateSize(this.paths!);
     }
-    return 0;
+    return new Size();
   }
 
-  public getY(): number {
-    // Return the y pos if the node has the property
-    if (this.y !== null) {
-      return this.y;
+  public setPosition(position: Vector): this {
+    if (this.position !== null) {
+      return this.set('position', position);
     }
     if (this.type === NodeType.GROUP) {
-      return Sizeable.calculateY(this.nodes!);
+      return this.set('nodes', Sizeable.setSizeablePositions(this.nodes!, position));
     }
     if (this.type === NodeType.VECTOR) {
-      return Sizeable.calculateY(this.paths!);
+      return this.set('paths', Sizeable.setSizeablePositions(this.paths!, position));
     }
-    return 0;
-  }
-
-  public getWidth(): number {
-    // Return the width if the node has the property
-    if (this.width !== null) {
-      return this.width;
-    }
-    if (this.type === NodeType.GROUP) {
-      return Sizeable.calculateWidth(this.nodes!, this.getX());
-    }
-    if (this.type === NodeType.VECTOR) {
-      return Sizeable.calculateWidth(this.paths!, this.getX());
-    }
-    return 0;
-  }
-
-  public getHeight(): number {
-    // Return the height if the node has the property
-    if (this.height !== null) {
-      return this.height;
-    }
-    if (this.type === NodeType.GROUP) {
-      return Sizeable.calculateHeight(this.nodes!, this.getY());
-    }
-    if (this.type === NodeType.VECTOR) {
-      return Sizeable.calculateHeight(this.paths!, this.getY());
-    }
-    return 0;
-  }
-
-  public setPosition(position: Position): this {
-    return this.setX(position.x).setY(position.y);
+    return this;
   }
 
   public setSize(size: Size): this {
-    return this.setWidth(size.width).setHeight(size.height);
-  }
-
-  public setX(x: number): this {
-    if (this.x !== null) {
-      return this.set('x', x);
+    if (this.size !== null) {
+      return this.set('size', size);
     }
     if (this.type === NodeType.GROUP) {
-      return this.set('nodes',
-        Sizeable.setSizeableXPositions(this.nodes!, this.getX(), x)
-      );
+      return this.set('nodes', Sizeable.setSizeableSizes(this.nodes!, size));
     }
     if (this.type === NodeType.VECTOR) {
-      return this.set('paths',
-        Sizeable.setSizeableXPositions(this.paths!, this.getX(), x)
-      );
-    }
-    return this;
-  }
-
-  public setY(y: number): this {
-    if (this.y !== null) {
-      return this.set('y', y);
-    }
-    if (this.type === NodeType.GROUP) {
-      return this.set('nodes',
-        Sizeable.setSizeableYPositions(this.nodes!, this.getY(), y)
-      );
-    }
-    if (this.type === NodeType.VECTOR) {
-      return this.set('paths',
-        Sizeable.setSizeableYPositions(this.paths!, this.getY(), y)
-      );
-    }
-    return this;
-  }
-
-  public setWidth(width: number): this {
-    if (this.width !== null) {
-      return this.set('width', width);
-    }
-    if (this.type === NodeType.GROUP) {
-      return this.set('nodes',
-        Sizeable.setSizeableWidths(this.nodes!, this.getX(), this.getWidth(), width)
-      );
-    }
-    if (this.type === NodeType.VECTOR) {
-      return this.set('paths',
-        Sizeable.setSizeableWidths(this.paths!, this.getX(), this.getWidth(), width)
-      );
-    }
-    return this;
-  }
-
-  public setHeight(height: number): this {
-    if (this.height !== null) {
-      return this.set('height', height);
-    }
-    if (this.type === NodeType.GROUP) {
-      return this.set('nodes',
-        Sizeable.setSizeableHeights(this.nodes!, this.getY(), this.getHeight(), height)
-      );
-    }
-    if (this.type === NodeType.VECTOR) {
-      return this.set('paths',
-        Sizeable.setSizeableHeights(this.paths!, this.getY(), this.getHeight(), height)
-      );
+      return this.set('paths', Sizeable.setSizeableSizes(this.paths!, size));
     }
     return this;
   }
@@ -368,9 +238,10 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
   public toCSS(fillContainer?: boolean): CSSProperties {
     const fillStyle = this.fill ? this.fill.toFillCSS() : {};
     const strokeStyle = this.stroke ? this.stroke.toStrokeCSS(this.strokeWeight, this.strokeAlign) : {};
+    const size = this.getSize();
     return {
-      height: fillContainer ? '100%' : this.getHeight(),
-      width: fillContainer ? '100%' : this.getWidth(),
+      height: fillContainer ? '100%' : size.height,
+      width: fillContainer ? '100%' : size.width,
       ...this.getBorderRadiusCSS(),
       ...fillStyle,
       ...strokeStyle

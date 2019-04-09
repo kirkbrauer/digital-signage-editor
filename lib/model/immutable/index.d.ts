@@ -8,5 +8,5 @@ export * from './EditorState';
 export * from './Node';
 export * from './Sizeable';
 export * from './SelectionBox';
-export * from './Position';
+export * from './Vector';
 export * from './Size';

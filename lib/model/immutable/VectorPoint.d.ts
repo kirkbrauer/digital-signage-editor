@@ -1,43 +1,32 @@
 import { Record } from 'immutable';
+import { Vector } from './Vector';
 /**
  * A vector point.
  */
-export interface VectorPointProps {
+export interface IVectorPoint {
     /**
      * ID of the vector point.
      */
     id: string;
     /**
-     * The absolute x position of the point.
+     * The position of the vector point.
      */
-    x: number;
-    /**
-     * The absolute y position of the point.
-     */
-    y: number;
+    position: Vector;
     /**
      * Whether the control points are locked.
      */
     ctrlPointsLocked?: boolean;
     /**
-     * First bezier curve control point X position.
+     * First bezier curve control point.
      */
-    ctrlPoint1X?: number;
+    ctrlPoint1: Vector | null;
     /**
-     * First bezier curve control point Y position.
+     * Second bezier curve control point.
      */
-    ctrlPoint1Y?: number;
-    /**
-     * Second bezier curve control point X position.
-     */
-    ctrlPoint2X?: number;
-    /**
-     * Second bezier curve control point Y position.
-     */
-    ctrlPoint2Y?: number;
+    ctrlPoint2: Vector | null;
 }
-declare const VectorPoint_base: Record.Factory<VectorPointProps>;
+declare const VectorPoint_base: Record.Factory<IVectorPoint>;
 export declare class VectorPoint extends VectorPoint_base {
-    constructor(props?: Partial<VectorPointProps>);
+    constructor(props?: Partial<IVectorPoint>);
 }
 export {};

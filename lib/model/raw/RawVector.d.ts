@@ -1,4 +1,4 @@
-export interface Position {
+export interface RawVector {
     x: number;
     y: number;
 }

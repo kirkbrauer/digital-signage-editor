@@ -1,28 +1,7 @@
 import { Record } from 'immutable';
+import { RawColor } from '../raw';
 
-export interface IColor {
-  
-  /**
-   * Red value between 0 and 255.
-   */
-  red: number;
-
-  /**
-   * Green value between 0 and 255.
-   */
-  green: number;
-
-  /**
-   * Blue value between 0 and 255.
-   */
-  blue: number;
-
-  /**
-   * Alpha value between 0 and 1.
-   */
-  alpha: number;
-
-}
+export interface IColor extends RawColor { }
 
 const defaultColor: IColor = {
   red: 0,
