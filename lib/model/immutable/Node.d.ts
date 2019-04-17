@@ -3,12 +3,13 @@ import { Sizeable } from './Sizeable';
 import { LayoutConstraints } from './LayoutConstraints';
 import { VectorPath } from './VectorPath';
 import { Fill } from './Fill';
-import { EditorState } from 'draft-js';
+import { EditorState as DraftJSEditorState } from 'draft-js';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
-import { NodeType, StrokeAlign } from '../raw';
+import { NodeType, StrokeAlign, RawNode } from '../raw';
 import { Vector } from './Vector';
 import { Size } from './Size';
+import { Serializable } from './Serializable';
 /**
  * An editor node.
  */
@@ -54,10 +55,6 @@ export interface INode {
      */
     nodes: List<Node> | null;
     /**
-     * Is the node a selection group.
-     */
-    selection: boolean;
-    /**
      * Outline stroke fill  and vector nodes.
      */
     stroke: Fill | null;
@@ -76,7 +73,7 @@ export interface INode {
     /**
      * DraftJS editor state.
      */
-    editorState: EditorState | null;
+    editorState: DraftJSEditorState | null;
     /**
      * The corner radius of a rectangle.
      */
@@ -91,8 +88,9 @@ export interface INode {
      */
     rotation: number;
 }
+export declare const defaultNode: INode;
 declare const Node_base: Record.Factory<INode>;
-export declare class Node extends Node_base implements Sizeable {
+export declare class Node extends Node_base implements Sizeable, Serializable<RawNode> {
     constructor(props?: Partial<INode>);
     getBoundingBox(): BoundingBox;
     getTransformedBoundingBox(): BoundingBox;
@@ -103,11 +101,13 @@ export declare class Node extends Node_base implements Sizeable {
     /**
      * Returns the border radius CSS for a node.
      */
-    private getBorderRadiusCSS;
+    getBorderRadiusCSS(): CSSProperties;
     /**
      * Returns the node as CSS properties.
      * @param fillContainer Should the node fill its parent container div.
      */
     toCSS(fillContainer?: boolean): CSSProperties;
+    toRaw(): RawNode;
+    static fromRaw(raw: RawNode): Node;
 }
 export {};

@@ -1,9 +1,10 @@
 import { Record, List } from 'immutable';
 import { Color } from './Color';
 import { CSSProperties } from 'react';
-import { StrokeAlign } from '../raw';
+import { StrokeAlign, RawFill } from '../raw';
 import { ColorStop } from './ColorStop';
 import { ImageScaleMode, GradientType, ImageRepeatMode } from '../raw';
+import { Serializable } from './Serializable';
 
 /**
  * A fill for a shape or line.
@@ -60,7 +61,7 @@ export interface IFill {
   imageUrl: string | null;
 }
 
-const defaultFill: IFill = {
+export const defaultFill: IFill = {
   visible: true,
   opacity: 1.0,
   color: new Color(),
@@ -72,9 +73,9 @@ const defaultFill: IFill = {
   imageUrl: null
 };
 
-export class Fill extends Record<IFill>(defaultFill) {
+export class Fill extends Record<IFill>(defaultFill) implements Serializable<RawFill> {
 
-  private getGradientTypeCSSString(): string {
+  public getGradientTypeCSSString(): string {
     switch (this.gradientType) {
       case GradientType.LINEAR: return 'linear-gradient';
       case GradientType.RADIAL: return 'radial-gradient';
@@ -82,19 +83,19 @@ export class Fill extends Record<IFill>(defaultFill) {
     }
   }
 
-  private getGradientCSSString(): string {
+  public getGradientCSSString(): string {
     const stops: string[] = [];
     // Set the gradient angle
-    const angle = this.gradientType === GradientType.RADIAL ? 'circle' : (this.gradientAngle || 0);
+    const angle = this.gradientType === GradientType.RADIAL ? 'circle' : `${this.gradientAngle || 0}deg`;
     // Generate the gradient stops
     for (const stop of this.gradientStops || []) {
       stops.push(`${stop.color.toString(this.opacity || 1)} ${stop.position * 100}%`);
     }
     // Return the gradient sting
-    return `${this.getGradientTypeCSSString()}(${angle}deg, ${stops.join(',')})`;
+    return `${this.getGradientTypeCSSString()}(${angle}, ${stops.join(', ')})`;
   }
 
-  private getScaleModeCSSString(): string | undefined {
+  public getScaleModeCSSString(): string | undefined {
     switch (this.scaleMode) {
       case ImageScaleMode.FIT: return 'contain';
       case ImageScaleMode.FILL: return 'cover';
@@ -103,7 +104,7 @@ export class Fill extends Record<IFill>(defaultFill) {
     }
   }
 
-  private getRepeatModeString(): string {
+  public getRepeatModeCSSString(): string {
     switch (this.repeatMode) {
       case ImageRepeatMode.REPEAT: return 'repeat';
       case ImageRepeatMode.REPEAT_X: return 'repeat-x';
@@ -115,20 +116,18 @@ export class Fill extends Record<IFill>(defaultFill) {
   public toStrokeCSS(strokeWeight: number | null, strokeAlign: StrokeAlign | null): CSSProperties {
     if (strokeWeight) {
       if (this.visible) {
-        if (this.color) {
-          switch (strokeAlign) {
-            case StrokeAlign.OUTSIDE: return {
-              boxShadow: `0px 0px 0px ${strokeWeight}px ${this.color.toString(this.opacity)}`
-            };
-            case StrokeAlign.INSIDE: return {
-              boxShadow: `inset 0px 0px 0px ${strokeWeight}px ${this.color.toString(this.opacity)}`
-            };
-            default: return {
-              borderColor: this.color.toString(this.opacity),
-              borderStyle: 'solid',
-              borderWidth: strokeWeight
-            };
-          }
+        switch (strokeAlign) {
+          case StrokeAlign.OUTSIDE: return {
+            boxShadow: `0px 0px 0px ${strokeWeight}px ${this.color.toString(this.opacity)}`
+          };
+          case StrokeAlign.INSIDE: return {
+            boxShadow: `inset 0px 0px 0px ${strokeWeight}px ${this.color.toString(this.opacity)}`
+          };
+          default: return {
+            borderColor: this.color.toString(this.opacity),
+            borderStyle: 'solid',
+            borderWidth: strokeWeight
+          };
         }
       }
     }
@@ -143,7 +142,7 @@ export class Fill extends Record<IFill>(defaultFill) {
           backgroundImage: `url(${this.imageUrl})`,
           backgroundSize: this.getScaleModeCSSString(),
           backgroundPosition: 'center',
-          backgroundRepeat: this.scaleMode === ImageScaleMode.REPEAT ? this.getRepeatModeString() : 'no-repeat'
+          backgroundRepeat: this.getRepeatModeCSSString()
         };
       }
       if (this.gradientType) {
@@ -158,6 +157,34 @@ export class Fill extends Record<IFill>(defaultFill) {
       }
     }
     return {};
+  }
+
+  public toRaw(): RawFill {
+    return {
+      visible: this.visible,
+      opacity: this.opacity,
+      color: this.color.toRaw(),
+      gradientType: this.gradientType,
+      gradientAngle: this.gradientAngle,
+      gradientStops: this.gradientStops ? this.gradientStops.map(gradientStop => gradientStop.toRaw()).toArray() : null,
+      scaleMode: this.scaleMode,
+      repeatMode: this.repeatMode,
+      imageUrl: this.imageUrl
+    };
+  }
+
+  public static fromRaw(raw: RawFill): Fill {
+    return new Fill({
+      visible: raw.visible,
+      opacity: raw.opacity,
+      color: Color.fromRaw(raw.color),
+      gradientType: raw.gradientType,
+      gradientAngle: raw.gradientAngle,
+      gradientStops: raw.gradientStops ? List(raw.gradientStops.map(gradientStop => ColorStop.fromRaw(gradientStop))) : null,
+      scaleMode: raw.scaleMode,
+      repeatMode: raw.repeatMode,
+      imageUrl: raw.imageUrl
+    });
   }
 
 }

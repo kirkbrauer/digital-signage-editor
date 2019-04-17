@@ -67,10 +67,6 @@ export interface RawNode {
      */
     nodes: RawNode[] | null;
     /**
-     * Is the node a selection group.
-     */
-    selection: boolean;
-    /**
      * Outline stroke fill  and vector nodes.
      */
     stroke: RawFill | null;

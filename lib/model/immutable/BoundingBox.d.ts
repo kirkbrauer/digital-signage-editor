@@ -14,6 +14,7 @@ export interface IBoundingBox {
      */
     size: Size;
 }
+export declare const defaultBoundingBox: IBoundingBox;
 declare const BoundingBox_base: Record.Factory<IBoundingBox>;
 export declare class BoundingBox extends BoundingBox_base {
     /**

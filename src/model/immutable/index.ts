@@ -10,3 +10,5 @@ export * from './Sizeable';
 export * from './SelectionBox';
 export * from './Vector';
 export * from './Size';
+export * from './BoundingBox';
+export * from './ColorStop';

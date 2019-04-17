@@ -41,21 +41,13 @@ export abstract class Sizeable {
   public abstract setSize(size: Size): this;
 
   /**
-   * Calculates the bounding box of a sizeable.
-   * @param sizeables The sizeables to base the bounding box calculation.
-   */
-  public static calculateBoundingBox(sizeables: List<Sizeable>): BoundingBox {
-    return new BoundingBox({
-      position: Sizeable.calculatePosition(sizeables),
-      size: Sizeable.calculateSize(sizeables)
-    });
-  }
-
-  /**
    * Calculates the position of a list of sizeables.
    * @param sizeables The sizeables to base the position calculation.
    */
   public static calculatePosition(sizeables: List<Sizeable>): Vector {
+    // Return an empty Vector if the list is empty
+    if (sizeables.isEmpty()) return new Vector();
+    // Get the position of the first sizeable
     const sizeableZeroPos = sizeables.get(0)!.getPosition();
     // Get the initial values
     let minX = sizeableZeroPos.x;
@@ -80,6 +72,8 @@ export abstract class Sizeable {
    * @param sizeables The sizeables to base the size calculation.
    */
   public static calculateSize(sizeables: List<Sizeable>): Size {
+    // Return an empty Size if the list is empty
+    if (sizeables.isEmpty()) return new Size();
     // Find the maximum x and y positions of the sizeables
     const sizeableZeroBoundingBox = sizeables.get(0)!.getBoundingBox();
     // Get the maximum bounding box points
@@ -101,6 +95,17 @@ export abstract class Sizeable {
     return new Size({
       width: maxX - minPos.x,
       height: maxY - minPos.y
+    });
+  }
+
+  /**
+   * Calculates the bounding box of a sizeable.
+   * @param sizeables The sizeables to base the bounding box calculation.
+   */
+  public static calculateBoundingBox(sizeables: List<Sizeable>): BoundingBox {
+    return new BoundingBox({
+      position: Sizeable.calculatePosition(sizeables),
+      size: Sizeable.calculateSize(sizeables)
     });
   }
 

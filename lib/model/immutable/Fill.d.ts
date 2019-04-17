@@ -1,9 +1,10 @@
 import { Record, List } from 'immutable';
 import { Color } from './Color';
 import { CSSProperties } from 'react';
-import { StrokeAlign } from '../raw';
+import { StrokeAlign, RawFill } from '../raw';
 import { ColorStop } from './ColorStop';
 import { ImageScaleMode, GradientType, ImageRepeatMode } from '../raw';
+import { Serializable } from './Serializable';
 /**
  * A fill for a shape or line.
  */
@@ -49,13 +50,16 @@ export interface IFill {
      */
     imageUrl: string | null;
 }
+export declare const defaultFill: IFill;
 declare const Fill_base: Record.Factory<IFill>;
-export declare class Fill extends Fill_base {
-    private getGradientTypeCSSString;
-    private getGradientCSSString;
-    private getScaleModeCSSString;
-    private getRepeatModeString;
+export declare class Fill extends Fill_base implements Serializable<RawFill> {
+    getGradientTypeCSSString(): string;
+    getGradientCSSString(): string;
+    getScaleModeCSSString(): string | undefined;
+    getRepeatModeCSSString(): string;
     toStrokeCSS(strokeWeight: number | null, strokeAlign: StrokeAlign | null): CSSProperties;
     toFillCSS(): CSSProperties;
+    toRaw(): RawFill;
+    static fromRaw(raw: RawFill): Fill;
 }
 export {};

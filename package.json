@@ -5,17 +5,46 @@
   "types": "lib/index.d.ts",
   "author": "Kirk Brauer",
   "license": "MIT",
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "nyc mocha -r ts-node/register -r source-map-support/register --recursive \"test/**/*.test.ts\""
   },
   "precommit": [
-    "build"
+    "build",
+    "test"
   ],
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "include": [
+      "src/**"
+    ],
+    "reporter": [
+      "html",
+      "lcov",
+      "text-summary"
+    ],
+    "all": true
+  },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
     "@types/draft-js": "^0.10.29",
+    "@types/mocha": "^5.2.6",
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
+    "@types/sinon": "^7.0.11",
+    "@types/sinon-chai": "^3.2.2",
     "@types/uuid": "^3.4.4",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.2",
+    "nyc": "^13.3.0",
+    "sinon": "^7.3.1",
+    "sinon-chai": "^3.3.0",
+    "ts-node": "^8.0.3",
     "tslint": "^5.13.1",
     "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.1.6"

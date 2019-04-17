@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./lib",
     "target": "es5",
-    "module": "esnext",
+    "module": "commonjs",
     "lib": ["esnext", "es6", "dom"],
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -11,18 +11,21 @@
     "declaration": true,
     "sourceMap": false,
     "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "noUnusedLocals": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "rootDir": "src",
     "moduleResolution": "node",
     "downlevelIteration": true
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
     "node_modules",
-    "lib"
+    "lib",
+    "**/__tests__/*"
   ]
 }

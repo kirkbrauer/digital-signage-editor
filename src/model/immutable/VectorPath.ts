@@ -5,6 +5,8 @@ import uuid from 'uuid/v4';
 import { BoundingBox } from './BoundingBox';
 import { Vector } from './Vector';
 import { Size } from './Size';
+import { Serializable } from './Serializable';
+import { RawVectorPath } from '../raw';
 
 /**
  * A vector path.
@@ -15,11 +17,6 @@ export interface IVectorPath {
    * The ID of the vector path.
    */
   id: string;
-
-  /**
-   * The absolute position of the vector path.
-   */
-  position: Vector;
 
   /**
    * An array of points that make up the path.
@@ -34,13 +31,12 @@ export interface IVectorPath {
 
 }
 
-const defaultVectorPath: IVectorPath = {
+export const defaultVectorPath: IVectorPath = {
   id: '',
-  position: new Vector(),
   points: List()
 };
 
-export class VectorPath extends Record<IVectorPath>(defaultVectorPath) implements Sizeable {
+export class VectorPath extends Record<IVectorPath>(defaultVectorPath) implements Sizeable, Serializable<RawVectorPath> {
 
   constructor(props?: Partial<IVectorPath>) {
     // Generate a unique UUID for a new vector path.
@@ -135,6 +131,22 @@ export class VectorPath extends Record<IVectorPath>(defaultVectorPath) implement
         }));
       })
     );
+  }
+
+  public toRaw(): RawVectorPath {
+    return {
+      id: this.id,
+      points: this.points.map(point => point.toRaw()).toArray(),
+      open: this.open
+    };
+  }
+
+  public static fromRaw(raw: RawVectorPath): VectorPath {
+    return new VectorPath({
+      id: raw.id,
+      points: List(raw.points.map(point => VectorPoint.fromRaw(point))),
+      open: raw.open
+    })
   }
 
 }

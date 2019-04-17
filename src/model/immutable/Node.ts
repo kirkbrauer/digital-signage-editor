@@ -3,13 +3,14 @@ import { Sizeable } from './Sizeable';
 import { LayoutConstraints } from './LayoutConstraints';
 import { VectorPath } from './VectorPath';
 import { Fill } from './Fill';
-import { EditorState } from 'draft-js';
+import { EditorState as DraftJSEditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import uuid from 'uuid/v4';
 import { CSSProperties } from 'react';
 import { BoundingBox } from './BoundingBox';
-import { NodeType, StrokeAlign } from '../raw';
+import { NodeType, StrokeAlign, RawNode } from '../raw';
 import { Vector } from './Vector';
 import { Size } from './Size';
+import { Serializable } from './Serializable';
 
 /**
  * An editor node.
@@ -67,11 +68,6 @@ export interface INode {
   nodes: List<Node> | null;
 
   /**
-   * Is the node a selection group.
-   */
-  selection: boolean;
-
-  /**
    * Outline stroke fill  and vector nodes.
    */
   stroke: Fill | null;
@@ -94,7 +90,7 @@ export interface INode {
   /**
    * DraftJS editor state.
    */
-  editorState: EditorState | null;
+  editorState: DraftJSEditorState | null;
 
   /**
    * The corner radius of a rectangle.
@@ -114,7 +110,7 @@ export interface INode {
   
 }
 
-const defaultNode: INode = {
+export const defaultNode: INode = {
   id: '',
   type: NodeType.RECT,
   name: null,
@@ -125,18 +121,17 @@ const defaultNode: INode = {
   constraints: null,
   paths: null,
   nodes: null,
-  selection: false,
   stroke: null,
   fill: null,
   strokeWeight: 0,
   strokeAlign: StrokeAlign.CENTER,
-  editorState: EditorState.createEmpty(),
+  editorState: DraftJSEditorState.createEmpty(),
   cornerRadius: null,
   cornerRadii: null,
   rotation: 0
 };
 
-export class Node extends Record<INode>(defaultNode) implements Sizeable {
+export class Node extends Record<INode>(defaultNode) implements Sizeable, Serializable<RawNode> {
 
   constructor(props?: Partial<INode>) {
     // Generate a unique ID for each node if none is provided
@@ -159,10 +154,10 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     if (this.position !== null) {
       return this.position;
     }
-    if (this.type === NodeType.GROUP) {
+    if (this.type === NodeType.GROUP && this.nodes) {
       return Sizeable.calculatePosition(this.nodes!);
     }
-    if (this.type === NodeType.VECTOR) {
+    if (this.type === NodeType.VECTOR && this.paths) {
       return Sizeable.calculatePosition(this.paths!);
     }
     return new Vector();
@@ -173,10 +168,10 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
     if (this.size !== null) {
       return this.size;
     }
-    if (this.type === NodeType.GROUP) {
+    if (this.type === NodeType.GROUP && this.nodes) {
       return Sizeable.calculateSize(this.nodes!);
     }
-    if (this.type === NodeType.VECTOR) {
+    if (this.type === NodeType.VECTOR && this.paths) {
       return Sizeable.calculateSize(this.paths!);
     }
     return new Size();
@@ -211,7 +206,7 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
   /**
    * Returns the border radius CSS for a node.
    */
-  private getBorderRadiusCSS(): CSSProperties {
+  public getBorderRadiusCSS(): CSSProperties {
     if (this.type === NodeType.RECT) {
       if (this.cornerRadii) {
         return {
@@ -246,6 +241,52 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable {
       ...fillStyle,
       ...strokeStyle
     };
+  }
+
+  public toRaw(): RawNode {
+    return {
+      id: this.id,
+      type: this.type,
+      name: this.name,
+      position: this.position ? this.position.toRaw() : null,
+      size: this.size ? this.size.toRaw() : null,
+      visible: this.visible,
+      opacity: this.opacity,
+      constraints: this.constraints ? this.constraints.toRaw() : null,
+      paths: this.paths ? this.paths.map(path => path.toRaw()).toArray() : null,
+      nodes: this.nodes ? this.nodes.map(node => node.toRaw()).toArray() : null,
+      stroke: this.stroke ? this.stroke.toRaw() : null,
+      fill: this.fill ? this.fill.toRaw() : null,
+      strokeWeight: this.strokeWeight,
+      strokeAlign: this.strokeAlign,
+      content: this.editorState ? convertToRaw(this.editorState.getCurrentContent()) : null,
+      cornerRadius: this.cornerRadius,
+      cornerRadii: this.cornerRadii ? this.cornerRadii.toArray() : null,
+      rotation: this.rotation
+    };
+  }
+
+  public static fromRaw(raw: RawNode): Node {
+    return new Node({
+      id: raw.id,
+      type: raw.type,
+      name: raw.name,
+      position: raw.position ? Vector.fromRaw(raw.position) : null,
+      size: raw.size ? Size.fromRaw(raw.size) : null,
+      visible: raw.visible,
+      opacity: raw.opacity,
+      constraints: raw.constraints ? LayoutConstraints.fromRaw(raw.constraints) : null,
+      paths: raw.paths ? List(raw.paths.map(rawPath => VectorPath.fromRaw(rawPath))) : null,
+      nodes: raw.nodes ? List(raw.nodes.map(rawNode => Node.fromRaw(rawNode))) : null,
+      stroke: raw.stroke ? Fill.fromRaw(raw.stroke) : null,
+      fill: raw.fill ? Fill.fromRaw(raw.fill) : null,
+      strokeWeight: raw.strokeWeight,
+      strokeAlign: raw.strokeAlign,
+      editorState: raw.content ? DraftJSEditorState.createWithContent(convertFromRaw(raw.content)) : null,
+      cornerRadius: raw.cornerRadius,
+      cornerRadii: raw.cornerRadii ? List(raw.cornerRadii) : null,
+      rotation: raw.rotation
+    });
   }
 
 }

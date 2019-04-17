@@ -19,7 +19,7 @@ export interface IBoundingBox {
 
 }
 
-const defaultBoundingBox: IBoundingBox = {
+export const defaultBoundingBox: IBoundingBox = {
   position: new Vector(),
   size: new Size()
 };
@@ -58,7 +58,7 @@ export class BoundingBox extends Record<IBoundingBox>(defaultBoundingBox) {
    * Returns true if either of the bounding boxes instersect.
    * @param boundingBox The bounding box to check.
    */
-  public includes(boundingBox: BoundingBox) {
+  public includes(boundingBox: BoundingBox): boolean {
     // Calculate the max and min positions of the other bounding box
     const nodeMinX = boundingBox.getMinX();
     const nodeMinY = boundingBox.getMinY();

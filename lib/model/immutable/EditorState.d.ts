@@ -23,6 +23,7 @@ export interface IEditorState {
      */
     selectionBox: SelectionBox | null;
 }
+export declare const defaultEditorState: IEditorState;
 declare const EditorState_base: Record.Factory<IEditorState>;
 export declare class EditorState extends EditorState_base {
     /**
@@ -31,27 +32,19 @@ export declare class EditorState extends EditorState_base {
      */
     static of(document: Document): EditorState;
     /**
-     * Returns the bounding box of a selection.
+     * Returns the current document.
      */
-    getSelectionBoundingBox(): BoundingBox;
-    /**
-     * Returns the position of the current selection.
-     */
-    getSelectionPosition(): Vector;
-    /**
-     * Returns the size of the current selection.
-     */
-    getSelectionSize(): Size;
-    /**
-     * Returns a list of currently selected nodes.
-     */
-    getSelectedNodes(): List<Node>;
+    getDocument(): Document;
     /**
      * Selects a node.
      * @param id The ID of the node to select.
      * @param multiple Should multiple nodes be allowed to be selected.
      */
-    select(id: string, multiple: boolean): this;
+    select(id: string, multiple?: boolean): this;
+    /**
+     * Deselects a node.
+     * @param id The ID of the node to deselect.
+     */
     deselect(id: string): this;
     /**
      * Deselects all nodes.
@@ -88,6 +81,22 @@ export declare class EditorState extends EditorState_base {
      * Cuts the current selection.
      */
     cutSelection(): this;
+    /**
+     * Returns a list of currently selected nodes.
+     */
+    getSelectedNodes(): List<Node>;
+    /**
+     * Returns the bounding box of a selection.
+     */
+    getSelectionBoundingBox(): BoundingBox;
+    /**
+     * Returns the position of the current selection.
+     */
+    getSelectionPosition(): Vector;
+    /**
+     * Returns the size of the current selection.
+     */
+    getSelectionSize(): Size;
     /**
      * Clones the editor state.
      */

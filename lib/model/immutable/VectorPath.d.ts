@@ -4,6 +4,8 @@ import { Record, List } from 'immutable';
 import { BoundingBox } from './BoundingBox';
 import { Vector } from './Vector';
 import { Size } from './Size';
+import { Serializable } from './Serializable';
+import { RawVectorPath } from '../raw';
 /**
  * A vector path.
  */
@@ -12,10 +14,6 @@ export interface IVectorPath {
      * The ID of the vector path.
      */
     id: string;
-    /**
-     * The absolute position of the vector path.
-     */
-    position: Vector;
     /**
      * An array of points that make up the path.
      */
@@ -26,8 +24,9 @@ export interface IVectorPath {
      */
     open?: boolean;
 }
+export declare const defaultVectorPath: IVectorPath;
 declare const VectorPath_base: Record.Factory<IVectorPath>;
-export declare class VectorPath extends VectorPath_base implements Sizeable {
+export declare class VectorPath extends VectorPath_base implements Sizeable, Serializable<RawVectorPath> {
     constructor(props?: Partial<IVectorPath>);
     getBoundingBox(): BoundingBox;
     getTransformedBoundingBox(): BoundingBox;
@@ -35,5 +34,7 @@ export declare class VectorPath extends VectorPath_base implements Sizeable {
     getSize(): Size;
     setPosition(position: Vector): this;
     setSize(size: Size): this;
+    toRaw(): RawVectorPath;
+    static fromRaw(raw: RawVectorPath): VectorPath;
 }
 export {};

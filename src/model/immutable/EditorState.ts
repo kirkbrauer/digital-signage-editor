@@ -2,7 +2,7 @@ import { Record, List } from 'immutable';
 import { Document } from './Document';
 import { Node } from './Node';
 import { Sizeable } from './Sizeable';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import { SelectionBox } from './SelectionBox';
 import { BoundingBox } from './BoundingBox';
 import { Size } from './Size';
@@ -32,7 +32,7 @@ export interface IEditorState {
 
 }
 
-const defaultEditorState: IEditorState = {
+export const defaultEditorState: IEditorState = {
   document: new Document(),
   selectedIDs: List(),
   clipboard: List(),
@@ -50,31 +50,10 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
   }
 
   /**
-   * Returns the bounding box of a selection.
+   * Returns the current document.
    */
-  public getSelectionBoundingBox(): BoundingBox {
-    return Sizeable.calculateBoundingBox(this.getSelectedNodes());
-  }
-
-  /**
-   * Returns the position of the current selection.
-   */
-  public getSelectionPosition(): Vector {
-    return Sizeable.calculatePosition(this.getSelectedNodes());
-  }
-
-  /**
-   * Returns the size of the current selection.
-   */
-  public getSelectionSize(): Size {
-    return Sizeable.calculateSize(this.getSelectedNodes());
-  }
-
-  /**
-   * Returns a list of currently selected nodes.
-   */
-  public getSelectedNodes(): List<Node> {
-    return this.document.getNodesByID(this.selectedIDs);
+  public getDocument(): Document {
+    return this.document;
   }
 
   /**
@@ -82,12 +61,16 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    * @param id The ID of the node to select.
    * @param multiple Should multiple nodes be allowed to be selected.
    */
-  public select(id: string, multiple: boolean): this {
+  public select(id: string, multiple?: boolean): this {
     return this.set('selectedIDs',
       multiple ? this.selectedIDs.push(id) : List.of(id)
     );
   }
 
+  /**
+   * Deselects a node.
+   * @param id The ID of the node to deselect.
+   */
   public deselect(id: string): this {
     return this.set('selectedIDs',
       this.selectedIDs.filterNot(nodeId => nodeId === id)
@@ -174,6 +157,34 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    */
   public cutSelection(): this {
     return this.cut(this.selectedIDs).set('selectedIDs', List());
+  }
+
+  /**
+   * Returns a list of currently selected nodes.
+   */
+  public getSelectedNodes(): List<Node> {
+    return this.document.getNodesByID(this.selectedIDs);
+  }
+
+  /**
+   * Returns the bounding box of a selection.
+   */
+  public getSelectionBoundingBox(): BoundingBox {
+    return Sizeable.calculateBoundingBox(this.getSelectedNodes());
+  }
+
+  /**
+   * Returns the position of the current selection.
+   */
+  public getSelectionPosition(): Vector {
+    return Sizeable.calculatePosition(this.getSelectedNodes());
+  }
+
+  /**
+   * Returns the size of the current selection.
+   */
+  public getSelectionSize(): Size {
+    return Sizeable.calculateSize(this.getSelectedNodes());
   }
 
   /**

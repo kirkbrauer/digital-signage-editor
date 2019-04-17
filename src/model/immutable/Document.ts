@@ -1,5 +1,7 @@
 import { Record, List } from 'immutable';
 import { Node } from './Node';
+import { Serializable } from './Serializable';
+import { RawDocument } from '../raw';
 
 export interface IDocument {
 
@@ -20,13 +22,13 @@ export interface IDocument {
 
 }
 
-const defaultDocument: IDocument = {
+export const defaultDocument: IDocument = {
   nodes: List(),
   width: 1920,
   height: 1080
 };
 
-export class Document extends Record<IDocument>(defaultDocument) {
+export class Document extends Record<IDocument>(defaultDocument) implements Serializable<RawDocument> {
 
   /**
    * Creates a document of a list of nodes.
@@ -236,7 +238,8 @@ export class Document extends Record<IDocument>(defaultDocument) {
    */
   public sendBackward(ids: List<string>): this {
     let newDocument = this.clone();
-    for (const id of ids) {
+    // Reverse the nodes so they are send backward in the correct order
+    for (const id of ids.reverse()) {
       newDocument = newDocument.changeNodeIndex(id, 1);
     }
     return newDocument;
@@ -247,6 +250,22 @@ export class Document extends Record<IDocument>(defaultDocument) {
    */
   public clone(): this {
     return this;
+  }
+
+  public toRaw(): RawDocument {
+    return {
+      nodes: this.nodes.map(node => node.toRaw()).toArray(),
+      width: this.width,
+      height: this.height
+    };
+  }
+
+  public static fromRaw(raw: RawDocument): Document {
+    return new Document({
+      nodes: List(raw.nodes.map(rawNode => Node.fromRaw(rawNode))),
+      width: raw.width,
+      height: raw.height
+    });
   }
 
 }

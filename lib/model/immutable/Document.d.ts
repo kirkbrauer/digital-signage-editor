@@ -1,5 +1,7 @@
 import { Record, List } from 'immutable';
 import { Node } from './Node';
+import { Serializable } from './Serializable';
+import { RawDocument } from '../raw';
 export interface IDocument {
     /**
      * Nodes in the current document.
@@ -14,8 +16,9 @@ export interface IDocument {
      */
     height: number;
 }
+export declare const defaultDocument: IDocument;
 declare const Document_base: Record.Factory<IDocument>;
-export declare class Document extends Document_base {
+export declare class Document extends Document_base implements Serializable<RawDocument> {
     /**
      * Creates a document of a list of nodes.
      * @param nodes The nodes to include in the document.
@@ -107,5 +110,7 @@ export declare class Document extends Document_base {
      * Clones the document.
      */
     clone(): this;
+    toRaw(): RawDocument;
+    static fromRaw(raw: RawDocument): Document;
 }
 export {};

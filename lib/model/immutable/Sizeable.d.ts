@@ -33,11 +33,6 @@ export declare abstract class Sizeable {
      */
     abstract setSize(size: Size): this;
     /**
-     * Calculates the bounding box of a sizeable.
-     * @param sizeables The sizeables to base the bounding box calculation.
-     */
-    static calculateBoundingBox(sizeables: List<Sizeable>): BoundingBox;
-    /**
      * Calculates the position of a list of sizeables.
      * @param sizeables The sizeables to base the position calculation.
      */
@@ -47,6 +42,11 @@ export declare abstract class Sizeable {
      * @param sizeables The sizeables to base the size calculation.
      */
     static calculateSize(sizeables: List<Sizeable>): Size;
+    /**
+     * Calculates the bounding box of a sizeable.
+     * @param sizeables The sizeables to base the bounding box calculation.
+     */
+    static calculateBoundingBox(sizeables: List<Sizeable>): BoundingBox;
     /**
      * Sets the positions of a list of sizeables inside a prent sizeable.
      * @param sizeables The list of sizeables to update.

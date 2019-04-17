@@ -1,5 +1,7 @@
 import { Record } from 'immutable';
 import { Vector } from './Vector';
+import { Serializable } from './Serializable';
+import { RawVectorPoint } from '../raw';
 /**
  * A vector point.
  */
@@ -25,8 +27,11 @@ export interface IVectorPoint {
      */
     ctrlPoint2: Vector | null;
 }
+export declare const defaultVectorPoint: IVectorPoint;
 declare const VectorPoint_base: Record.Factory<IVectorPoint>;
-export declare class VectorPoint extends VectorPoint_base {
+export declare class VectorPoint extends VectorPoint_base implements Serializable<RawVectorPoint> {
     constructor(props?: Partial<IVectorPoint>);
+    toRaw(): RawVectorPoint;
+    static fromRaw(raw: RawVectorPoint): VectorPoint;
 }
 export {};
