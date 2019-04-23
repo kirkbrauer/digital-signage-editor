@@ -1,6 +1,6 @@
 {
   "name": "digital-signage-editor",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Kirk Brauer",
@@ -50,7 +50,6 @@
     "typescript": "^3.1.6"
   },
   "dependencies": {
-    "digital-signage-types": "https://github.com/kirkbrauer/digital-signage-types",
     "draft-js": "^0.10.5",
     "immutable": "^4.0.0-rc.12",
     "pre-commit": "^1.2.2",
