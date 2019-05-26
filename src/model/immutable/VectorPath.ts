@@ -146,7 +146,7 @@ export class VectorPath extends Record<IVectorPath>(defaultVectorPath) implement
       id: raw.id,
       points: List(raw.points.map(point => VectorPoint.fromRaw(point))),
       open: raw.open
-    })
+    });
   }
 
 }

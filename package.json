@@ -10,9 +10,11 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "nyc mocha -r ts-node/register -r source-map-support/register --recursive \"test/**/*.test.ts\""
+    "test": "nyc mocha -r ts-node/register -r source-map-support/register --recursive \"test/**/*.test.ts\"",
+    "lint": "tslint -p ."
   },
   "precommit": [
+    "lint",
     "build",
     "test"
   ],
