@@ -1,9 +1,8 @@
 import { Record, List } from 'immutable';
 import { Color } from './Color';
 import { CSSProperties } from 'react';
-import { StrokeAlign, RawFill } from '../raw';
 import { ColorStop } from './ColorStop';
-import { ImageScaleMode, GradientType, ImageRepeatMode } from '../raw';
+import { StrokeAlign, RawFill, ImageScaleMode, GradientType, ImageRepeatMode } from '../raw';
 import { Serializable } from './Serializable';
 /**
  * A fill for a shape or line.
