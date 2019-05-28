@@ -7,6 +7,8 @@ import { SelectionBox } from './SelectionBox';
 import { BoundingBox } from './BoundingBox';
 import { Size } from './Size';
 import { Vector } from './Vector';
+import { EditorState as DraftJsEditorState } from 'draft-js';
+import { NodeType } from '../raw';
 
 export interface IEditorState {
 
@@ -28,7 +30,22 @@ export interface IEditorState {
   /**
    * The user's selection box.
    */
-  selectionBox: SelectionBox | null;
+  selectionBox?: SelectionBox | null;
+
+  /**
+   * The next node to insert on click.
+   */
+  insertOnClick?: Node | null;
+
+  /**
+   * The ID of the last inserted node.
+   */
+  insertedId?: string | null;
+
+  /**
+   * The position to paste the next item.
+   */
+  pastePosition?: Vector | null;
 
 }
 
@@ -36,7 +53,10 @@ export const defaultEditorState: IEditorState = {
   document: new Document(),
   selectedIDs: List(),
   clipboard: List(),
-  selectionBox: null
+  selectionBox: null,
+  insertOnClick: null,
+  insertedId: null,
+  pastePosition: null
 };
 
 export class EditorState extends Record<IEditorState>(defaultEditorState) {
@@ -119,14 +139,19 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    */
   public paste(select?: boolean): this {
     const newIDs: string[] = [];
-    let state = this.set('document',
-      this.document.addNodes(this.clipboard.map((node) => {
-        // Give each of the pasted nodes a new ID
-        const newID = uuid();
-        newIDs.push(newID);
-        return node.set('id', newID);
-      }))
-    );
+    let newNodes = this.clipboard.map((node) => {
+      // Give each of the pasted nodes a new ID
+      const newID = uuid();
+      newIDs.push(newID);
+      // Set the node's ID and position
+      return node.set('id', newID);
+    });
+    // Update the positions of all the nodes to match the paste position
+    if (this.pastePosition) {
+      newNodes = Sizeable.setSizeablePositions(newNodes, this.pastePosition);
+    }
+    // Add all the nodes to the document
+    let state = this.set('document', this.document.addNodes(newNodes));
     // Clear all previous selections
     state = state.deselectAll();
     // Select pasted nodes
@@ -185,6 +210,42 @@ export class EditorState extends Record<IEditorState>(defaultEditorState) {
    */
   public getSelectionSize(): Size {
     return Sizeable.calculateSize(this.getSelectedNodes());
+  }
+
+  /**
+   * Returns the currently selected text editor state.
+   */
+  public getSelectedTextEditorState(): DraftJsEditorState | null {
+    // Only return if we have a single text node selected
+    if (this.selectedIDs.count() === 1) {
+      for (const node of this.getSelectedNodes()) {
+        if (node.type === NodeType.TEXT) {
+          if (node.editorState) {
+            return node.editorState;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sets the selected text editor state.
+   */
+  public setSelectedTextEditorState(editorState: DraftJsEditorState): this {
+    // Only update if we have a single text node selected
+    if (this.selectedIDs.count() === 1) {
+      for (const node of this.getSelectedNodes()) {
+        if (node.type === NodeType.TEXT) {
+          if (node.editorState) {
+            return this.set('document',
+              this.getDocument().updateNode(node.set('editorState', editorState))
+            );
+          }
+        }
+      }
+    }
+    return this;
   }
 
   /**

@@ -1,6 +1,36 @@
 import React, { createRef } from 'react';
 import NodeComponent from './NodeComponent';
-import { Editor } from 'draft-js';
+import { Editor, RichUtils, EditorState, DraftInlineStyle } from 'draft-js';
+
+const styleMap = {
+  STRIKETHROUGH: {
+    textDecoration: 'line-through',
+  }
+};
+
+const getStyleCSS = (style?: string): Object => {
+  if (!style) return {};
+  if (style.includes('FONT_SIZE_')) {
+    return {
+      fontSize: `${style.split('_')[2]}px`
+    };
+  }
+  if (style.includes('COLOR_')) {
+    const split = style.split('_')[2];
+    return {
+      color: `rgba(${split[1]},${split[2]},${split[3]},${split[4]})`
+    };
+  }
+  return {};
+};
+
+const customStyleFn = (style: DraftInlineStyle) => {
+  const cssStyles: Object[] = [];
+  style.forEach((styleName) => {
+    cssStyles.push(getStyleCSS(styleName));
+  });
+  return Object.assign({}, ...cssStyles);
+};
 
 export default class Text extends NodeComponent {
 
@@ -12,6 +42,18 @@ export default class Text extends NodeComponent {
 
   public renderStaticContent() {
     return this.renderContent();
+  }
+
+  private handleKeyCommand(command: string, editorState: EditorState) {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
+    if (newState) {
+      if (this.props.onChange) {
+        const newNode = this.props.node.set('editorState', newState);
+        this.props.onChange(newNode);
+      }
+      return 'handled';
+    }
+    return 'not-handled';
   }
 
   private renderContent() {
@@ -30,12 +72,15 @@ export default class Text extends NodeComponent {
         >
           <Editor
             ref={this.editorRef}
+            customStyleMap={styleMap}
+            customStyleFn={customStyleFn}
             editorState={this.props.node.editorState!}
             readOnly={this.props.readOnly}
             onFocus={() => {
               // Select the node when the text editor is focused
               this.props.onSelect && this.props.onSelect();
             }}
+            handleKeyCommand={(command, state) => this.handleKeyCommand(command, state)}
             onChange={(editorState) => {
               if (this.props.onChange) {
                 const newNode = this.props.node.set('editorState', editorState);

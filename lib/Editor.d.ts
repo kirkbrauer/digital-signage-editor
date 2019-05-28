@@ -4,6 +4,7 @@ declare type OnChangeEvent = (editorState: EditorState) => void;
 interface EditorProps {
     editorState: EditorState;
     shift?: boolean;
+    disableSelect?: boolean;
     onChange?: OnChangeEvent;
     width?: number;
     height?: number;

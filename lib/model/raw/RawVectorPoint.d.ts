@@ -14,13 +14,13 @@ export interface RawVectorPoint {
     /**
      * Whether the control points are locked.
      */
-    ctrlPointsLocked?: boolean;
+    ctrlPointsLocked?: boolean | null;
     /**
      * First bezier curve control point.
      */
-    ctrlPoint1: RawVector | null;
+    ctrlPoint1?: RawVector | null;
     /**
      * Second bezier curve control point.
      */
-    ctrlPoint2: RawVector | null;
+    ctrlPoint2?: RawVector | null;
 }

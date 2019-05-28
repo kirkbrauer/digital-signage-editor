@@ -43,17 +43,17 @@ export interface RawNode {
   /**
    * Name of the node.
    */
-  name: string | null;
+  name?: string | null;
 
   /**
    * The position of the node.
    */
-  position: RawVector | null;
+  position?: RawVector | null;
 
   /**
    * The size of the node.
    */
-  size: RawSize | null;
+  size?: RawSize | null;
 
   /**
    * Whether the node is visible.
@@ -68,57 +68,57 @@ export interface RawNode {
   /**
    * Position constraints for the node within a group or the document.
    */
-  constraints: RawLayoutConstraints | null;
+  constraints?: RawLayoutConstraints | null;
 
   /**
    * An array of paths making up the geometry for a vector node.
    */
-  paths: RawVectorPath[] | null;
+  paths?: RawVectorPath[] | null;
 
   /**
    * Child nodes for a group.
    */
-  nodes: RawNode[] | null;
+  nodes?: RawNode[] | null;
 
   /**
    * Outline stroke fill  and vector nodes.
    */
-  stroke: RawFill | null;
+  stroke?: RawFill | null;
 
   /**
    * Fill for shapes and vector nodes.
    */
-  fill: RawFill | null;
+  fill?: RawFill | null;
 
   /**
    * Weight of the outline stroke for shapes and vector nodes.
    */
-  strokeWeight: number | null;
+  strokeWeight?: number | null;
 
   /**
    * Outline stroke alignment for shapes and vector nodes.
    */
-  strokeAlign: StrokeAlign | null;
+  strokeAlign?: StrokeAlign | null;
 
   /**
    * DraftJS raw content.
    */
-  content: RawDraftContentState | null;
+  content?: RawDraftContentState | null;
 
   /**
    * The corner radius of a rectangle.
    */
-  cornerRadius: number | null;
+  cornerRadius?: number | null;
 
   /**
    * An array of corner radii for rectangles.
    */
-  cornerRadii: number[] | null;
+  cornerRadii?: number[] | null;
 
   /**
    * The rotation of the node in degrees.
    * 0-359 degrees.
    */
-  rotation: number;
+  rotation?: number | null;
 
 }

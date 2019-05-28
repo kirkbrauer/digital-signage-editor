@@ -20,11 +20,11 @@ export interface RawLayoutConstraints {
   /**
    * Vertical constraint.
    */
-  vertical: Constraint | null;
+  vertical?: Constraint | null;
 
   /**
    * Horizontal constraint.
    */
-  horizontal: Constraint | null;
+  horizontal?: Constraint | null;
 
 }

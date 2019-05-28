@@ -36,7 +36,6 @@ abstract class NodeComponent extends Component<NodeProps> {
   }
 
   private onRotate(angle: number) {
-    console.log(angle);
     if (this.props.onChange) {
       this.props.onChange(this.props.node.set('rotation', angle));
     }
@@ -49,7 +48,7 @@ abstract class NodeComponent extends Component<NodeProps> {
         disabled={!this.props.selected || this.props.inGroup}
         position={node.getPosition()}
         size={node.getSize()}
-        rotation={node.rotation}
+        rotation={node.rotation || 0}
         disableRotation
         onDrag={() => {
           this.dragging = true;

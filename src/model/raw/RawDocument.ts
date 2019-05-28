@@ -1,4 +1,5 @@
 import { RawNode } from './RawNode';
+import { RawColor } from './RawColor';
 
 export interface RawDocument {
 
@@ -16,5 +17,10 @@ export interface RawDocument {
    * The height of the document.
    */
   height: number;
+
+  /**
+   * The background color of the document.
+   */
+  backgroundColor?: RawColor | null;
 
 }

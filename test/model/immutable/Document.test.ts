@@ -46,7 +46,8 @@ describe('Document immutable', () => {
       expect(document.toRaw()).to.deep.equal({
         nodes: [NODE.toRaw()],
         width: document.width,
-        height: document.height
+        height: document.height,
+        backgroundColor: null
       });
     });
   });

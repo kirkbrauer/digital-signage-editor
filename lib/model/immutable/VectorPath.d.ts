@@ -22,7 +22,7 @@ export interface IVectorPath {
      * Whether the path is open.
      * Paths open between their first and last points.
      */
-    open?: boolean;
+    open?: boolean | null;
 }
 export declare const defaultVectorPath: IVectorPath;
 declare const VectorPath_base: Record.Factory<IVectorPath>;

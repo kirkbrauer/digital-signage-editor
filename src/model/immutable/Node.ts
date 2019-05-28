@@ -30,17 +30,17 @@ export interface INode {
   /**
    * Name of the node.
    */
-  name: string | null;
+  name?: string | null;
 
   /**
    * The position of the node.
    */
-  position: Vector | null;
+  position?: Vector | null;
 
   /**
    * The size of the node.
    */
-  size: Size | null;
+  size?: Size | null;
 
   /**
    * Whether the node is visible.
@@ -55,58 +55,58 @@ export interface INode {
   /**
    * Position constraints for the node within a group or the document.
    */
-  constraints: LayoutConstraints | null;
+  constraints?: LayoutConstraints | null;
 
   /**
    * An array of paths making up the geometry for a vector node.
    */
-  paths: List<VectorPath> | null;
+  paths?: List<VectorPath> | null;
 
   /**
    * Child nodes for a group.
    */
-  nodes: List<Node> | null;
+  nodes?: List<Node> | null;
 
   /**
    * Outline stroke fill  and vector nodes.
    */
-  stroke: Fill | null;
+  stroke?: Fill | null;
 
   /**
    * Fill for shapes and vector nodes.
    */
-  fill: Fill | null;
+  fill?: Fill | null;
 
   /**
    * Weight of the outline stroke for shapes and vector nodes.
    */
-  strokeWeight: number | null;
+  strokeWeight?: number | null;
 
   /**
    * Outline stroke alignment for shapes and vector nodes.
    */
-  strokeAlign: StrokeAlign | null;
+  strokeAlign?: StrokeAlign | null;
 
   /**
    * DraftJS editor state.
    */
-  editorState: DraftJSEditorState | null;
+  editorState?: DraftJSEditorState | null;
 
   /**
    * The corner radius of a rectangle.
    */
-  cornerRadius: number | null;
+  cornerRadius?: number | null;
 
   /**
    * An array of corner radii for rectangles.
    */
-  cornerRadii: List<number> | null;
+  cornerRadii?: List<number> | null;
 
   /**
    * The rotation of the node in degrees.
    * 0-359 degrees.
    */
-  rotation: number;
+  rotation?: number | null;
   
 }
 
@@ -151,7 +151,7 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable, Serial
 
   public getPosition(): Vector {
     // Return the position if the node has the property
-    if (this.position !== null) {
+    if (this.position) {
       return this.position;
     }
     if (this.type === NodeType.GROUP && this.nodes) {
@@ -165,7 +165,7 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable, Serial
 
   public getSize(): Size {
     // Return the size if the node has the property
-    if (this.size !== null) {
+    if (this.size) {
       return this.size;
     }
     if (this.type === NodeType.GROUP && this.nodes) {
@@ -178,7 +178,7 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable, Serial
   }
 
   public setPosition(position: Vector): this {
-    if (this.position !== null) {
+    if (this.position) {
       return this.set('position', position);
     }
     if (this.type === NodeType.GROUP) {
@@ -191,7 +191,7 @@ export class Node extends Record<INode>(defaultNode) implements Sizeable, Serial
   }
 
   public setSize(size: Size): this {
-    if (this.size !== null) {
+    if (this.size) {
       return this.set('size', size);
     }
     if (this.type === NodeType.GROUP) {

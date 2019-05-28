@@ -17,15 +17,15 @@ export interface IVectorPoint {
     /**
      * Whether the control points are locked.
      */
-    ctrlPointsLocked?: boolean;
+    ctrlPointsLocked?: boolean | null;
     /**
      * First bezier curve control point.
      */
-    ctrlPoint1: Vector | null;
+    ctrlPoint1?: Vector | null;
     /**
      * Second bezier curve control point.
      */
-    ctrlPoint2: Vector | null;
+    ctrlPoint2?: Vector | null;
 }
 export declare const defaultVectorPoint: IVectorPoint;
 declare const VectorPoint_base: Record.Factory<IVectorPoint>;

@@ -19,6 +19,6 @@ export interface RawVectorPath {
    * Whether the path is open.
    * Paths open between their first and last points.
    */
-  open?: boolean;
+  open?: boolean | null;
   
 }

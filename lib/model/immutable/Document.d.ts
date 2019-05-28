@@ -2,6 +2,7 @@ import { Record, List } from 'immutable';
 import { Node } from './Node';
 import { Serializable } from './Serializable';
 import { RawDocument } from '../raw';
+import { Color } from './Color';
 export interface IDocument {
     /**
      * Nodes in the current document.
@@ -15,6 +16,10 @@ export interface IDocument {
      * The height of the document.
      */
     height: number;
+    /**
+     * The background color of the document.
+     */
+    backgroundColor?: Color | null;
 }
 export declare const defaultDocument: IDocument;
 declare const Document_base: Record.Factory<IDocument>;

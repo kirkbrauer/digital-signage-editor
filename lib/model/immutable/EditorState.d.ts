@@ -5,6 +5,7 @@ import { SelectionBox } from './SelectionBox';
 import { BoundingBox } from './BoundingBox';
 import { Size } from './Size';
 import { Vector } from './Vector';
+import { EditorState as DraftJsEditorState } from 'draft-js';
 export interface IEditorState {
     /**
      * Current document.
@@ -21,7 +22,19 @@ export interface IEditorState {
     /**
      * The user's selection box.
      */
-    selectionBox: SelectionBox | null;
+    selectionBox?: SelectionBox | null;
+    /**
+     * The next node to insert on click.
+     */
+    insertOnClick?: Node | null;
+    /**
+     * The ID of the last inserted node.
+     */
+    insertedId?: string | null;
+    /**
+     * The position to paste the next item.
+     */
+    pastePosition?: Vector | null;
 }
 export declare const defaultEditorState: IEditorState;
 declare const EditorState_base: Record.Factory<IEditorState>;
@@ -97,6 +110,14 @@ export declare class EditorState extends EditorState_base {
      * Returns the size of the current selection.
      */
     getSelectionSize(): Size;
+    /**
+     * Returns the currently selected text editor state.
+     */
+    getSelectedTextEditorState(): DraftJsEditorState | null;
+    /**
+     * Sets the selected text editor state.
+     */
+    setSelectedTextEditorState(editorState: DraftJsEditorState): this;
     /**
      * Clones the editor state.
      */

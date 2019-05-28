@@ -4,12 +4,14 @@ import Node from './components/Node';
 import Selection from './components/Selection';
 import { List } from 'immutable';
 import SelectionBox from './components/SelectionBox';
+import uuid from 'uuid/v4';
 
 type OnChangeEvent = (editorState: EditorState) => void;
 
 interface EditorProps {
   editorState: EditorState;
   shift?: boolean;
+  disableSelect?: boolean;
   onChange?: OnChangeEvent;
   width?: number;
   height?: number;
@@ -96,44 +98,83 @@ export default class Editor extends Component<EditorProps> {
   }
 
   private onMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (this.cursorOutsideSelection(e) && !this.props.shift) {
-      // Get the cursor position from the event
-      const cursorPosition = this.getCursorPosition(e);
-      // Create an empty selection box
-      this.setEditorState(
-        this.getEditorState().set('selectionBox',
-          new ImmutableSelectionBox({
-            startPos: cursorPosition,
-            cursorPos: cursorPosition
-          })
-        ).deselectAll() // Deselect all nodes before allowing selection
-      );
+    // Get the cursor position from the event
+    const cursorPosition = this.getCursorPosition(e);
+    if (!this.props.disableSelect && e.button === 0) {
+      if (this.cursorOutsideSelection(e) && !this.props.shift) {
+        // Create an empty selection box
+        this.setEditorState(
+          this.getEditorState().set('selectionBox',
+            new ImmutableSelectionBox({
+              startPos: cursorPosition,
+              cursorPos: cursorPosition
+            })
+          ).deselectAll() // Deselect all nodes before allowing selection
+        );
+      }
+    }
+    // If this is a right click, save the position as the paste position
+    if (e.button === 2) {
+      this.setEditorState(this.getEditorState().set('pastePosition', cursorPosition));
     }
   }
 
   private onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    // Update the selection box cursor position on mouse move
-    if (this.getEditorState().selectionBox) {
+    if (!this.props.disableSelect) {
       // Get the cursor position from the event
       const cursorPosition = this.getCursorPosition(e);
-      // Set the cursor position of the selection box.
-      let newState = this.getEditorState().setIn(['selectionBox', 'cursorPos'], cursorPosition);
-      // Select nodes if they are inside the selection box
-      for (const node of newState.document.nodes) {
-        if (newState.selectionBox!.includes(node)) {
-          newState = newState.select(node.id, true);
-        } else {
-          newState = newState.deselect(node.id);
+      if (this.getEditorState().selectionBox) {
+        // Update the selection box cursor position on mouse move
+        // Set the cursor position of the selection box.
+        let newState = this.getEditorState().setIn(['selectionBox', 'cursorPos'], cursorPosition);
+        if (!this.getEditorState().insertOnClick) {
+          // Select nodes if they are inside the selection box
+          for (const node of newState.document.nodes) {
+            if (newState.selectionBox!.includes(node)) {
+              newState = newState.select(node.id, true);
+            } else {
+              newState = newState.deselect(node.id);
+            }
+          }
         }
+        this.setEditorState(newState);
       }
-      this.setEditorState(newState);
     }
   }
 
   private onMouseUp(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    // Clear the selection box at the end of the selection
-    if (this.getEditorState().selectionBox) {
-      this.setEditorState(this.getEditorState().set('selectionBox', null));
+    if (!this.props.disableSelect) {
+      // Clear the selection box at the end of the selection
+      if (this.getEditorState().selectionBox) {
+        // Insert the new node
+        if (this.getEditorState().insertOnClick) {
+          console.log('Insert');
+          const selectionBox = this.getEditorState().selectionBox!;
+          // Generate a new ID for the node
+          const newId = uuid();
+          // Set the properties of the new node
+          const newNode = this.getEditorState().insertOnClick!
+            .set('id', newId)
+            .set('position', selectionBox.getPosition())
+            .set('size', selectionBox.getSize());
+          // Insert the new node at the click location
+          this.setEditorState(
+            this.getEditorState()
+              .set('document', 
+                this.getEditorState()
+                  .getDocument()
+                  .addNode(newNode)
+              )
+              .set('insertOnClick', null)
+              .set('insertedId', newId)
+              .set('selectedIDs', List([newId]))
+              .set('selectionBox', null)
+          );
+        } else {
+          // Clear the selection box
+          this.setEditorState(this.getEditorState().set('selectionBox', null));
+        }
+      }
     }
   }
 
@@ -143,7 +184,10 @@ export default class Editor extends Component<EditorProps> {
         style={{
           width: this.getEditorState().document.width,
           height: this.getEditorState().document.height,
-          position: 'relative'
+          backgroundColor: this.getEditorState().document.backgroundColor ? this.getEditorState().document.backgroundColor!.toString() : undefined,
+          position: 'relative',
+          cursor: this.getEditorState().insertOnClick ? 'crosshair' : 'default',
+          overflow: 'hidden'
         }}
         onMouseDown={e => this.onMouseDown(e)}
         onMouseMove={e => this.onMouseMove(e)}
@@ -168,7 +212,7 @@ export default class Editor extends Component<EditorProps> {
           />
         ) : null}
         {this.getEditorState().selectionBox ?
-          <SelectionBox box={this.getEditorState().selectionBox!} />
+          <SelectionBox box={this.getEditorState().selectionBox!} insertBox={Boolean(this.getEditorState().insertOnClick)} />
           : null}
       </div>
     );

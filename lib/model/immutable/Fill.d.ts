@@ -24,30 +24,30 @@ export interface IFill {
      * Gradient type.
      * Only used if there are one or more gradient stops.
      */
-    gradientType: GradientType | null;
+    gradientType?: GradientType | null;
     /**
      * Angle of the gradient in degrees.
      * Only used if there are one or more gradient stops.
      */
-    gradientAngle: number | null;
+    gradientAngle?: number | null;
     /**
      * The graident stops of the fill.
      */
-    gradientStops: List<ColorStop> | null;
+    gradientStops?: List<ColorStop> | null;
     /**
      * Image scale mode.
      * Only used if the image URL is not null.
      */
-    scaleMode: ImageScaleMode | null;
+    scaleMode?: ImageScaleMode | null;
     /**
      * Repeat image mode.
      * Only used if the image URL is not null and the scale mode is REPEAT.
      */
-    repeatMode: ImageRepeatMode | null;
+    repeatMode?: ImageRepeatMode | null;
     /**
      * Image url.
      */
-    imageUrl: string | null;
+    imageUrl?: string | null;
 }
 export declare const defaultFill: IFill;
 declare const Fill_base: Record.Factory<IFill>;
@@ -56,7 +56,7 @@ export declare class Fill extends Fill_base implements Serializable<RawFill> {
     getGradientCSSString(): string;
     getScaleModeCSSString(): string | undefined;
     getRepeatModeCSSString(): string;
-    toStrokeCSS(strokeWeight: number | null, strokeAlign: StrokeAlign | null): CSSProperties;
+    toStrokeCSS(strokeWeight?: number | null, strokeAlign?: StrokeAlign | null): CSSProperties;
     toFillCSS(): CSSProperties;
     toRaw(): RawFill;
     static fromRaw(raw: RawFill): Fill;

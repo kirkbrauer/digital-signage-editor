@@ -2,6 +2,7 @@ import { Record, List } from 'immutable';
 import { Node } from './Node';
 import { Serializable } from './Serializable';
 import { RawDocument } from '../raw';
+import { Color } from './Color';
 
 export interface IDocument {
 
@@ -20,12 +21,18 @@ export interface IDocument {
    */
   height: number;
 
+  /**
+   * The background color of the document.
+   */
+  backgroundColor?: Color | null;
+
 }
 
 export const defaultDocument: IDocument = {
   nodes: List(),
   width: 1920,
-  height: 1080
+  height: 1080,
+  backgroundColor: null
 };
 
 export class Document extends Record<IDocument>(defaultDocument) implements Serializable<RawDocument> {
@@ -256,7 +263,8 @@ export class Document extends Record<IDocument>(defaultDocument) implements Seri
     return {
       nodes: this.nodes.map(node => node.toRaw()).toArray(),
       width: this.width,
-      height: this.height
+      height: this.height,
+      backgroundColor: this.backgroundColor ? this.backgroundColor.toRaw() : null
     };
   }
 
@@ -264,7 +272,8 @@ export class Document extends Record<IDocument>(defaultDocument) implements Seri
     return new Document({
       nodes: List(raw.nodes.map(rawNode => Node.fromRaw(rawNode))),
       width: raw.width,
-      height: raw.height
+      height: raw.height,
+      backgroundColor: raw.backgroundColor ? Color.fromRaw(raw.backgroundColor) : null
     });
   }
 

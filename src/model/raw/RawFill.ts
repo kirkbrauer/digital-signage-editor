@@ -7,7 +7,7 @@ import { RawColorStop } from './RawColorStop';
 export enum ImageScaleMode {
   FILL = 'FILL',
   FIT = 'FIT',
-  REPEAT = 'REPEAR',
+  REPEAT = 'REPEAT',
   STRETCH = 'STRETCH'
 }
 
@@ -52,33 +52,33 @@ export interface RawFill {
    * Gradient type.
    * Only used if there are one or more gradient stops.
    */
-  gradientType: GradientType | null;
+  gradientType?: GradientType | null;
 
   /**
    * Angle of the gradient in degrees.
    * Only used if there are one or more gradient stops.
    */
-  gradientAngle: number | null;
+  gradientAngle?: number | null;
 
   /**
    * The graident stops of the fill.
    */
-  gradientStops: RawColorStop[] | null;
+  gradientStops?: RawColorStop[] | null;
 
   /**
    * Image scale mode.
    * Only used if the image URL is not null.
    */
-  scaleMode: ImageScaleMode | null;
+  scaleMode?: ImageScaleMode | null;
 
   /**
    * Repeat image mode.
    * Only used if the image URL is not null and the scale mode is REPEAT.
    */
-  repeatMode: ImageRepeatMode | null;
+  repeatMode?: ImageRepeatMode | null;
 
   /**
    * Image url.
    */
-  imageUrl: string | null;
+  imageUrl?: string | null;
 }

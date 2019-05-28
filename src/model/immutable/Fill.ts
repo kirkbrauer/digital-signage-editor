@@ -35,35 +35,35 @@ export interface IFill {
    * Gradient type.
    * Only used if there are one or more gradient stops.
    */
-  gradientType: GradientType | null;
+  gradientType?: GradientType | null;
 
   /**
    * Angle of the gradient in degrees.
    * Only used if there are one or more gradient stops.
    */
-  gradientAngle: number | null;
+  gradientAngle?: number | null;
 
   /**
    * The graident stops of the fill.
    */
-  gradientStops: List<ColorStop> | null;
+  gradientStops?: List<ColorStop> | null;
 
   /**
    * Image scale mode.
    * Only used if the image URL is not null.
    */
-  scaleMode: ImageScaleMode | null;
+  scaleMode?: ImageScaleMode | null;
 
   /**
    * Repeat image mode.
    * Only used if the image URL is not null and the scale mode is REPEAT.
    */
-  repeatMode: ImageRepeatMode | null;
+  repeatMode?: ImageRepeatMode | null;
 
   /**
    * Image url.
    */
-  imageUrl: string | null;
+  imageUrl?: string | null;
 }
 
 export const defaultFill: IFill = {
@@ -118,7 +118,7 @@ export class Fill extends Record<IFill>(defaultFill) implements Serializable<Raw
     }
   }
 
-  public toStrokeCSS(strokeWeight: number | null, strokeAlign: StrokeAlign | null): CSSProperties {
+  public toStrokeCSS(strokeWeight?: number | null, strokeAlign?: StrokeAlign | null): CSSProperties {
     if (strokeWeight) {
       if (this.visible) {
         switch (strokeAlign) {
