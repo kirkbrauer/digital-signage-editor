@@ -23,6 +23,14 @@ export class EditorUtils {
   }
 
   /**
+   * Returns the DraftJS style for a font.
+   * @param font The font name.
+   */
+  public static getFontStyle(font: string): string {
+    return `FONT_FAMILY_${font}`;
+  }
+
+  /**
    * Returns the font sizes of the current text selection.
    * @param editorState The immutable editor state.
    */
@@ -133,6 +141,65 @@ export class EditorUtils {
       newContentState, 
       currentSelection,
       EditorUtils.getColorStyle(color)
+    );
+    // Push the changes to the stack
+    textEditorState = DraftJsEditorState.push(
+      textEditorState,
+      newContentState,
+      'change-inline-style'
+    );
+    // Update the text editor state
+    return editorState.setSelectedTextEditorState(
+      textEditorState
+    );
+  }
+
+  /**
+   * Returns the fonts of the current text selection.
+   * @param editorState The immutable editor state.
+   */
+  public static getSelectedFonts(editorState: EditorState): string[] {
+    const fonts: string[] = [];
+    const textEditorState = editorState.getSelectedTextEditorState();
+    if (!textEditorState) return [];
+    const inlineStyles = textEditorState.getCurrentInlineStyle();
+    inlineStyles.forEach((style) => {
+      if (style) {
+        if (style.includes('FONT_FAMILY_')) {
+          fonts.push(style.split('_')[2]);
+        }
+      }
+    });
+    // If there are no fonts, return the default, Arial
+    if (fonts.length === 0) return ['Arial'];
+    return fonts;
+  }
+
+  /**
+   * Sets the font of the current text selection.
+   * @param editorState The immutable editor state.
+   * @param font The new font name.
+   */
+  public static setSelectedFont(editorState: EditorState, font: string): EditorState {
+    let textEditorState = editorState.getSelectedTextEditorState();
+    if (!textEditorState) return editorState;
+    let newContentState = textEditorState.getCurrentContent();
+    const currentSelection = textEditorState.getSelection();
+    // Get the existing font
+    const oldFonts = EditorUtils.getSelectedFonts(editorState);
+    // Remove the existing font styles
+    for (const oldFont of oldFonts) {
+      newContentState = Modifier.removeInlineStyle(
+        newContentState, 
+        currentSelection,
+        EditorUtils.getFontStyle(oldFont)
+      );
+    }
+    // Set the new font
+    newContentState = Modifier.applyInlineStyle(
+      newContentState, 
+      currentSelection,
+      EditorUtils.getFontStyle(font)
     );
     // Push the changes to the stack
     textEditorState = DraftJsEditorState.push(

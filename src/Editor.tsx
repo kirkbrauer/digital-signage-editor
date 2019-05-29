@@ -109,7 +109,8 @@ export default class Editor extends Component<EditorProps> {
               startPos: cursorPosition,
               cursorPos: cursorPosition
             })
-          ).deselectAll() // Deselect all nodes before allowing selection
+          )
+          .deselectAll() // Deselect all nodes before allowing selection
         );
       }
     }
@@ -120,9 +121,9 @@ export default class Editor extends Component<EditorProps> {
   }
 
   private onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    // Get the cursor position from the event
+    const cursorPosition = this.getCursorPosition(e);
     if (!this.props.disableSelect) {
-      // Get the cursor position from the event
-      const cursorPosition = this.getCursorPosition(e);
       if (this.getEditorState().selectionBox) {
         // Update the selection box cursor position on mouse move
         // Set the cursor position of the selection box.

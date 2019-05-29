@@ -14,6 +14,11 @@ export declare class EditorUtils {
      */
     static getColorStyle(color: Color): string;
     /**
+     * Returns the DraftJS style for a font.
+     * @param font The font name.
+     */
+    static getFontStyle(font: string): string;
+    /**
      * Returns the font sizes of the current text selection.
      * @param editorState The immutable editor state.
      */
@@ -35,4 +40,15 @@ export declare class EditorUtils {
      * @param color The immutable color object.
      */
     static setSelectedTextColor(editorState: EditorState, color: Color): EditorState;
+    /**
+     * Returns the fonts of the current text selection.
+     * @param editorState The immutable editor state.
+     */
+    static getSelectedFonts(editorState: EditorState): string[];
+    /**
+     * Sets the font of the current text selection.
+     * @param editorState The immutable editor state.
+     * @param font The new font name.
+     */
+    static setSelectedFont(editorState: EditorState, font: string): EditorState;
 }

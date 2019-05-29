@@ -380,6 +380,7 @@ export default class Transformer extends Component<TransformerProps, Transformer
         }}
         onMouseDown={(e) => {
           !this.props.disableDrag && this.onStartDrag(e);
+          this.props.onClick && this.props.onClick(e);
         }}
         onClick={(e) => { this.props.onClick && this.props.onClick(e); }}
       >

@@ -15,8 +15,13 @@ const getStyleCSS = (style?: string): Object => {
       fontSize: `${style.split('_')[2]}px`
     };
   }
+  if (style.includes('FONT_FAMILY_')) {
+    return {
+      fontFamily: style.split('_')[2]
+    };
+  }
   if (style.includes('COLOR_')) {
-    const split = style.split('_')[2];
+    const split = style.split('_');
     return {
       color: `rgba(${split[1]},${split[2]},${split[3]},${split[4]})`
     };
