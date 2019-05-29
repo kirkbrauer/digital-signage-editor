@@ -71,7 +71,8 @@ export default class Text extends NodeComponent {
           margin: 8,
           zIndex: 10,
           minWidth: 'calc(100% - 16px)',
-          cursor: 'text'
+          cursor: 'text',
+          userSelect: !this.props.selected ? 'none' : undefined
         }}
           onMouseDown={(e) => { e.stopPropagation(); }}
         >

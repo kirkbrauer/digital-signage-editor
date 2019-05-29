@@ -51,4 +51,15 @@ export declare class EditorUtils {
      * @param font The new font name.
      */
     static setSelectedFont(editorState: EditorState, font: string): EditorState;
+    /**
+     * Returns the fill colors of the current selection.
+     * @param editorState The immutable editor state.
+     */
+    static getSelectedFillColors(editorState: EditorState): Color[];
+    /**
+     * Sets the fill color of the current selection.
+     * @param editorState The immutable editor state.
+     * @param color The new RGB color.
+     */
+    static setSelectedFillColor(editorState: EditorState, color: Color): EditorState;
 }

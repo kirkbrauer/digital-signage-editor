@@ -1,5 +1,6 @@
-import { EditorState, Color } from './model/immutable';
+import { EditorState, Color, Node, Fill } from './model/immutable';
 import { EditorState as DraftJsEditorState, Modifier } from 'draft-js';
+import { List } from 'immutable';
 
 /**
  * A class of utility functions for manipulating the editor state.
@@ -211,6 +212,46 @@ export class EditorUtils {
     return editorState.setSelectedTextEditorState(
       textEditorState
     );
+  }
+
+  /**
+   * Returns the fill colors of the current selection.
+   * @param editorState The immutable editor state.
+   */
+  public static getSelectedFillColors(editorState: EditorState): Color[] {
+    const colors: Color[] = [];
+    const selectedNodes = editorState.getSelectedNodes();
+    for (const node of selectedNodes) {
+      if (node.fill) {
+        if (node.fill.color) {
+          colors.push(node.fill.color);
+        }
+      }
+    }
+    if (colors.length === 0) return [new Color()];
+    return colors;
+  }
+
+  /**
+   * Sets the fill color of the current selection.
+   * @param editorState The immutable editor state.
+   * @param color The new RGB color.
+   */
+  public static setSelectedFillColor(editorState: EditorState, color: Color): EditorState {
+    const newNodes: Node[] = [];
+    const selectedNodes = editorState.getSelectedNodes();
+    for (const node of selectedNodes) {
+      if (node.fill) {
+        newNodes.push(node.setIn(['fill', 'color'], color));
+      } else {
+        const newFill = new Fill({
+          color,
+          visible: true
+        });
+        newNodes.push(node.set('fill', newFill));
+      }
+    }
+    return editorState.set('document', editorState.getDocument().updateNodes(List(newNodes)));
   }
 
 }
